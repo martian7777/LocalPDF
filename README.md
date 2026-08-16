@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📄 LocalPDF — Private Document AI
+# 📄 LocalPDF: Private Document AI
 
 ### *Scan, understand, search, protect, and act on your documents with 100% on-device privacy.*
 
