@@ -1,0 +1,6 @@
+# Example only.
+# local.properties is normally machine-specific and should not be committed.
+
+sdk.dir=[ANDROID_SDK_PATH]
+
+# Do not store privileged production secrets here.
