@@ -1,64 +1,28 @@
-# Networking
+# Networking Architecture & Boundaries — LocalPDF
 
-## Project API
+## Core Philosophy: Zero Mandatory Network
 
-Base URL:
+LocalPDF operates as a completely offline, zero-cloud application. The core document capture, OCR, classification, search, editing, redaction, and storage engines have zero network dependencies and will never make outbound HTTP/HTTPS calls during regular usage.
 
-`[BASE_URL_OR_CONFIG_KEY]`
+## Optional Network Boundaries
 
-API style:
+Network connectivity is strictly gated and restricted to explicitly user-initiated, optional scenarios:
 
-`[REST / GRAPHQL / OTHER]`
+1. **On-Demand Language Pack & Embedding Model Downloads**:
+   - When a user requests an additional OCR language pack (e.g. Arabic, Urdu, Japanese) or advanced vector embedding model not bundled in the core APK assets.
+   - Downloaded via secure HTTPS with SHA-256 integrity verification.
+2. **User-Configured Custom WebDAV / Nextcloud Backup**:
+   - Optional, user-configured remote backup endpoint.
+   - Credentials encrypted via Android Keystore.
+3. **In-App Update Checks & Release Notes** (Optional GitHub release query for F-Droid/standalone builds).
 
-Client:
+## Network Implementation Stack (Optional Features)
 
-`[RETROFIT+OKHTTP / KTOR / OTHER]`
+- **HTTP Client**: Ktor Client with OkHttp / Android engine.
+- **Serialization**: Kotlinx Serialization JSON.
+- **Strict Network Security Config**: Enforcing HTTPS / TLS 1.3 only, certificate pinning for official model downloads, and zero cleartext traffic (`android:usesCleartextTraffic="false"`).
 
-Serialization:
+## Privacy Guarantee & Leak Prevention
 
-`[KOTLIN_SERIALIZATION / MOSHI / OTHER]`
-
-## Centralize
-
-- base URL
-- auth headers
-- serialization
-- timeouts
-- interceptors
-- error mapping
-- debug logging
-
-## API Models
-
-Transport DTOs should not become app-wide domain models by default.
-
-## Timeouts / Failures
-
-External APIs may:
-
-- timeout
-- fail
-- rate-limit
-- return malformed data
-- change behavior
-
-Define meaningful failure mapping.
-
-## Retries
-
-Retry only where safe.
-
-Do not blindly retry non-idempotent mutations.
-
-Use backoff when appropriate.
-
-## Authentication
-
-Centralize:
-
-- access token attachment
-- refresh logic
-- session expiration
-- logout cleanup
-
-Avoid feature-specific token logic.
+- Zero analytics SDKs, zero crash tracking telemetry uploading document data, zero third-party ad networks.
+- Strict gating: No background network worker will ever access document contents or extracted OCR text.

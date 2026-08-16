@@ -1,83 +1,33 @@
-# Observability & Analytics
+# Observability & Privacy Dashboard — LocalPDF
 
-## Goal
+## Privacy-First Logging & Monitoring
 
-Production should answer:
+LocalPDF rejects remote tracking, third-party analytics SDKs, and unredacted logging. All observability is user-centric, privacy-safe, and stored exclusively on the local device.
 
-- What crashed?
-- How often?
-- On which app version/device/OS?
-- Which operation failed?
-- How long did it take?
-- Can the user recover?
+## The Privacy Dashboard
 
-## Project Tooling
-
-Crash reporting:
-
-`[FIREBASE_CRASHLYTICS / SENTRY / OTHER]`
-
-Analytics:
-
-`[FIREBASE_ANALYTICS / AMPLITUDE / POSTHOG / OTHER]`
-
-Performance monitoring:
-
-`[TOOL]`
-
-Feature flags / remote config:
-
-`[TOOL]`
-
-## Logs
-
-Use structured and meaningful logs.
-
-Do not log:
-
-- passwords
-- tokens
-- private keys
-- full auth headers
-- unnecessary PII
-
-## Useful Technical Context
-
-Where safe:
-
-- app version
-- build type
-- OS version
-- device class
-- feature
-- operation
-- error category
-- duration
-
-## Analytics Events
-
-Track product behavior, not UI implementation details.
-
-Prefer:
+A central selling point and feature of LocalPDF is the user-facing **Privacy Dashboard** (`:feature:settings`):
 
 ```text
-item_created
-search_completed
-sync_failed
+┌────────────────────────────────────────────────────────┐
+│                   PRIVACY DASHBOARD                    │
+├────────────────────────────────────────────────────────┤
+│ Documents Uploaded to Cloud:       0 (Zero egress)     │
+│ Documents Processed Locally:     184                   │
+│ OCR Pages Recognized On-Device:  512                   │
+│ Sensitive Fields Redacted:        42                   │
+│ Third-Party Trackers:              0                   │
+│ Active Network Connections:        NONE                │
+├────────────────────────────────────────────────────────┤
+│ [Clear Local Search Index]   [Delete OCR Cache]        │
+└────────────────────────────────────────────────────────┘
 ```
 
-over:
+## Local Structured Logging
 
-```text
-blue_button_clicked
-```
-
-## Performance
-
-Track important:
-
-- startup
-- slow screens
-- network latency
-- sync failures
-- crash-free sessions
+- **Debug Builds**: Timber logger active with log tags formatted by feature module.
+- **Release Builds**: Timber tree stripped or routed to a secure in-memory circular log ring (max 100 entries) used only for user-initiated diagnostic bug reports.
+- **PII Scrubbing**: Log messages must NEVER contain:
+  - Document file paths with real names
+  - Extracted OCR text or user queries
+  - Passwords, encryption keys, or biometric tokens

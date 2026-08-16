@@ -1,82 +1,26 @@
-# Release & Play Store
+# Release & Distribution Strategy — LocalPDF
 
-## App Identity
+## Distribution Channels
 
-Package/application ID:
+1. **Google Play Store**: App Bundle (`.aab`) with Play Asset Delivery for optional language packs.
+2. **F-Droid / GitHub Releases / Direct APK**: Standalone universal `.apk` or per-ABI `.apk` (100% Google Play Services free).
 
-`[APPLICATION_ID]`
+## Pre-Release Checklist
 
-App name:
+- [ ] Run full automated test suite: `./gradlew test`
+- [ ] Run static analysis & lint: `./gradlew lintRelease detekt`
+- [ ] Verify Room database schema export has not broken migration paths
+- [ ] Test fresh install and migration from previous release on physical test device
+- [ ] Verify 100% offline functionality (Airplane mode scan, OCR, search, redact, and export)
+- [ ] Verify camera preview and OpenCV contour rendering on multiple aspect ratios
+- [ ] Verify BiometricPrompt authentication and Private Vault decryption
+- [ ] Check APK size per ABI (ensure INT8 ONNX models are compressed appropriately)
+- [ ] Verify Baseline Profiles are compiled in release AAB for sub-300ms cold startup
 
-`[APP_NAME]`
+## Signing Configuration
 
-## Versioning
-
-Version code strategy:
-
-`[STRATEGY]`
-
-Version name strategy:
-
-`[STRATEGY]`
-
-## Signing
-
-Release signing strategy:
-
-`[PLAY_APP_SIGNING / OTHER]`
-
-Never commit signing passwords/private keys into the repository.
-
-## Release Tracks
-
-Use as applicable:
-
-- internal
-- closed testing
-- open testing
-- production
-
-## Rollout
-
-Preferred production rollout:
-
-`[STAGED_PERCENTAGE / FULL / OTHER]`
-
-For risky releases, prefer staged rollout where practical.
-
-## Release Checklist
-
-- [ ] build passes
-- [ ] unit tests pass
-- [ ] relevant UI/instrumentation tests pass
-- [ ] lint/static analysis pass
-- [ ] release build uses correct endpoints
-- [ ] debug tooling disabled
-- [ ] secrets not packaged
-- [ ] migrations reviewed
-- [ ] crash/analytics tooling verified
-- [ ] accessibility smoke check
-- [ ] adaptive layout smoke check
-- [ ] app startup/performance checked if affected
-- [ ] release notes prepared
-
-## Store Listing
-
-Privacy policy:
-
-`[URL]`
-
-Support URL/email:
-
-`[VALUE]`
-
-Data safety requirements:
-
-`[NOTES]`
-
-## Rollback / Hotfix
-
-Process:
-
-`[PROCESS]`
+Release keys must never be committed to Git. Managed via environment variables in CI/CD (GitHub Actions):
+- `LOCALPDF_KEYSTORE_BASE64`
+- `LOCALPDF_KEYSTORE_PASSWORD`
+- `LOCALPDF_KEY_ALIAS`
+- `LOCALPDF_KEY_PASSWORD`

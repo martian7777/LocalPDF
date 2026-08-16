@@ -1,77 +1,48 @@
-# Testing & Quality
+# Testing Strategy & Quality Gates — LocalPDF
 
-## Test by Risk
-
-Prioritize:
-
-- business rules
-- ViewModel state transitions
-- repository behavior
-- offline/sync behavior
-- Room migrations
-- authentication/session behavior
-- permissions
-- critical navigation/user journeys
-
-## Test Types
-
-Use an appropriate mix of:
-
-- Kotlin/JVM unit tests
-- fake repository tests
-- Flow/Turbine tests
-- Room integration tests
-- Compose UI tests
-- instrumentation tests
-- screenshot tests if the project uses them
-- Macrobenchmark
-
-## Behavior Style
-
-Prefer:
+## Testing Pyramid
 
 ```text
-Given ...
-When ...
-Then ...
+               ▲
+              / \
+             /   \     UI & End-to-End Tests (Compose Test Rule, Robot Pattern)
+            /     \
+           /───────\   Integration Tests (Room FTS5, WorkManager, OpenCV Pipeline)
+          /         \
+         /───────────\ Unit Tests (Use Cases, ViewModels, Entity Extractors, Parsers)
 ```
 
-## UI Tests
+## 1. Unit Tests (`:core:*`, `:feature:*`)
 
-Prefer semantic selectors.
+- **Entity & Regex Extractors**: Test invoice number regexes, date normalizers, currency converters, IBAN validators with extensive edge-case datasets (e.g. `InvoiceExtractorTest`, `ReceiptExtractorTest`).
+- **Use Cases**: Test domain workflows with mocked repositories (`ScanAndProcessDocumentUseCaseTest`, `SearchDocumentsUseCaseTest`).
+- **ViewModels**: Test MVI state transitions using Turbine and Coroutine test dispatchers (`ScannerViewModelTest`, `DocumentViewerViewModelTest`).
 
-Use test tags only where semantics are insufficient.
+## 2. Integration Tests
 
-Avoid coordinate-based UI tests.
+- **Room Database & SQLite FTS5**: In-memory database testing verifying FTS5 full-text queries, phrase search, snippet highlight extraction, and schema migrations (`DocumentDaoTest`, `FtsSearchTest`, `DatabaseMigrationTest`).
+- **OpenCV Computer Vision**: Tests verifying contour detection, perspective quad calculation, and deskew angle math on fixed test image fixtures (`DocumentEdgeDetectorTest`).
+- **ONNX Model Inference**: Integration tests running quantized PaddleOCR and Document Classifier models on sample bitmap assets to assert deterministic inference outputs.
 
-## Migration Tests
+## 3. UI / Compose Tests
 
-Schema changes affecting production data should include migration verification.
-
-## CI Quality Gates
-
-Relevant work should normally pass:
-
-- compilation
-- formatting
-- lint
-- static analysis
-- unit tests
-- relevant instrumentation/UI tests
-- build
-
-## Project Commands
-
-Fill after project setup:
-
-```text
-Format: [COMMAND]
-Lint: [COMMAND]
-Static analysis: [COMMAND]
-Unit tests: [COMMAND]
-UI/instrumentation: [COMMAND]
-Build: [COMMAND]
-All checks: [COMMAND]
+- Screen-level UI testing with `createAndroidComposeRule` following the **Robot Pattern**:
+```kotlin
+@Test
+fun documentViewer_whenOcrToggled_showsBoundingBoxes() {
+    documentViewerRobot {
+        loadDocument(sampleDocument)
+        toggleOcrLayer()
+        assertBoundingBoxesVisible()
+        clickFirstOcrBlock()
+        assertOcrCorrectionDialogDisplayed()
+    }
+}
 ```
 
-Coverage is a signal, not the goal.
+## Quality Gates & CI
+
+- **`./gradlew test`**: All unit and Robolectric tests pass.
+- **`./gradlew lint`**: Zero Android Lint errors or high-severity warnings.
+- **`./gradlew detekt`**: Kotlin static code analysis passes.
+- **LeakCanary**: Monitored in debug builds to prevent Activity/Bitmap memory leaks.

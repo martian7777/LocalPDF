@@ -1,79 +1,93 @@
-# Presentation Layer
+# Presentation Architecture — LocalPDF
 
-## Responsibilities
+## Presentation Pattern: Unidirectional Data Flow (UDF)
 
-Presentation should:
+All features in LocalPDF adopt a strict Unidirectional Data Flow pattern powered by Jetpack Compose, Kotlin `StateFlow`, and sealed interface hierarchies for user actions and one-off side effects.
 
-- expose UI state
-- handle user actions
-- coordinate navigation/effects at boundaries
-- call domain/repository APIs through ViewModels
-- transform domain data for rendering
+## State Modeling Structure
 
-## Preferred Pattern
+Every feature screen defines three core contracts:
+
+1. **`UiState`** (Immutable data class): Holds the complete, deterministic snapshot of the screen UI.
+2. **`UiAction`** (Sealed interface): Represents all possible user interactions (button clicks, gestures, text input).
+3. **`UiEffect`** (Sealed interface): Represents one-off transient events (Navigation events, Toast messages, Biometric authentication triggers, System Share sheets).
 
 ```kotlin
-data class FeatureUiState(
-    val isLoading: Boolean = false,
-    val items: List<ItemUiModel> = emptyList(),
-    val error: UiText? = null
+// Example from :feature:viewer
+
+data class DocumentViewerUiState(
+    val isLoading: Boolean = true,
+    val document: Document? = null,
+    val currentPageIndex: Int = 0,
+    val totalPages: Int = 0,
+    val isOcrLayerVisible: Boolean = false,
+    val selectedOcrBlock: OcrBlock? = null,
+    val searchQuery: String = "",
+    val searchMatches: List<SearchMatch> = emptyList(),
+    val errorMessage: String? = null
 )
 
-sealed interface FeatureAction {
-    data object Retry : FeatureAction
-    data class ItemClicked(val id: String) : FeatureAction
+sealed interface DocumentViewerUiAction {
+    data class PageChanged(val pageIndex: Int) : DocumentViewerUiAction
+    data class ToggleOcrLayer(val isVisible: Boolean) : DocumentViewerUiAction
+    data class SelectOcrBlock(val block: OcrBlock?) : DocumentViewerUiAction
+    data class SearchText(val query: String) : DocumentViewerUiAction
+    data object ShareDocument : DocumentViewerUiAction
+    data object OpenRedactionStudio : DocumentViewerUiAction
+    data object OpenPdfTools : DocumentViewerUiAction
+}
+
+sealed interface DocumentViewerUiEffect {
+    data class NavigateToRedaction(val documentId: String) : DocumentViewerUiEffect
+    data class NavigateToEditor(val documentId: String) : DocumentViewerUiEffect
+    data class LaunchSystemShare(val fileUri: Uri) : DocumentViewerUiEffect
+    data class ShowSnackbar(val message: String) : DocumentViewerUiEffect
 }
 ```
 
-Composable:
+## ViewModel Guidelines
+
+1. **State Exposure**: Expose `StateFlow<UiState>` via `.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), InitialState)`.
+2. **Single Public Entry Point**: All actions dispatched through a single `fun onAction(action: UiAction)` function with exhaustive `when` handling.
+3. **No Direct Android Context/View references**: ViewModels must never hold references to `Context`, `Activity`, `View`, or `NavController`. Use injected Android application context or abstractions where needed.
+4. **Lifecycle-Safe Effects**: Dispatch one-time side effects via `Channel<UiEffect>(Channel.BUFFERED)` exposed as a `Flow<UiEffect>` and consumed in Compose using `LaunchedEffectWithLifecycle`.
+
+## Composable Contract & Previews
+
+Every screen consists of a root stateful container and a stateless composable:
 
 ```kotlin
 @Composable
-fun FeatureScreen(
-    state: FeatureUiState,
-    onAction: (FeatureAction) -> Unit
-)
+fun DocumentViewerRoute(
+    documentId: String,
+    onNavigateBack: () -> Unit,
+    onNavigateToRedaction: (String) -> Unit,
+    viewModel: DocumentViewerViewModel = hiltViewModel()
+) {
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    
+    ObserveAsEvents(viewModel.uiEffect) { effect ->
+        when (effect) {
+            is DocumentViewerUiEffect.NavigateToRedaction -> onNavigateToRedaction(effect.documentId)
+            is DocumentViewerUiEffect.LaunchSystemShare -> { /* Launch share intent */ }
+            is DocumentViewerUiEffect.ShowSnackbar -> { /* Show snackbar */ }
+        }
+    }
+
+    DocumentViewerScreen(
+        state = state,
+        onAction = viewModel::onAction,
+        onBackClick = onNavigateBack
+    )
+}
+
+@Composable
+fun DocumentViewerScreen(
+    state: DocumentViewerUiState,
+    onAction: (DocumentViewerUiAction) -> Unit,
+    onBackClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Pure stateless rendering based on state and emitting actions
+}
 ```
-
-## State Rules
-
-- immutable state
-- `StateFlow` exposed publicly
-- mutable flows remain private
-- UI state should represent renderable truth
-- avoid duplicate state ownership
-- do not store large raw domain graphs in UI state if unnecessary
-
-## Effects
-
-Use one-time effects only for genuine one-shot behavior such as:
-
-- navigation
-- snackbar
-- launching external activity
-- permission request
-
-Do not introduce an effect type by default.
-
-## ViewModel Rules
-
-ViewModels should not:
-
-- know Compose internals
-- hold Activity/Fragment references
-- own unrelated global state
-- perform direct UI rendering work
-
-Use `viewModelScope`.
-
-Respect cancellation.
-
-## Process Death
-
-Determine which state should survive:
-
-- configuration change
-- process death
-- app restart
-
-Persist user work where needed.

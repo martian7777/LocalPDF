@@ -1,144 +1,55 @@
-# Android Security
+# Security & Privacy Architecture — LocalPDF
 
-Read for auth, sensitive storage, permissions, deep links, WebViews, file sharing, payments, biometrics, or private user data.
+## Core Security Tenet: Zero Cloud Egress
 
-## APK Assumption
+LocalPDF is built on the strict architectural premise of **100% on-device data processing**.
+- No mandatory remote accounts or telemetry SDKs.
+- No network transmission of scanned images, PDF binaries, or extracted OCR text.
+- All AI inference (PaddleOCR, classification, entity extraction) runs locally via ONNX Runtime Mobile.
 
-Assume APK/AAB contents can be inspected.
+## Multi-Tiered Storage & Encryption Model
 
-Never embed privileged secrets in:
+LocalPDF employs a two-tier storage model:
 
-- BuildConfig
-- strings.xml
-- native code
-- obfuscated classes
-- assets/resources
+```text
+┌────────────────────────────────────────────────────────────────────────┐
+│                          LOCALPDF APP SANDBOX                          │
+│                                                                        │
+│  ┌─────────────────────────────────┐   ┌────────────────────────────┐  │
+│  │      STANDARD APP-PRIVATE       │   │       PRIVATE VAULT        │  │
+│  │            STORAGE              │   │         (ENCRYPTED)        │  │
+│  ├─────────────────────────────────┤   ├────────────────────────────┤  │
+│  │ • context.filesDir/docs/        │   │ • EncryptedFile            │  │
+│  │ • Linux UID sandbox isolation   │   │ • AES-256-GCM hardware key │  │
+│  │ • Unencrypted on disk for fast  │   │ • BiometricPrompt required │  │
+│  │   multi-page rendering          │   │ • Master key in Keystore   │  │
+│  │ • Fast Room FTS5 indexing       │   │ • Auto-lock on app minimize│  │
+│  └─────────────────────────────────┘   └────────────────────────────┘  │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-Use server-side secret storage.
+### 1. Standard Tier (App-Private Sandbox)
+- Documents, generated searchable PDFs, and page bitmaps reside in `context.filesDir/documents/`.
+- Protected by standard Linux process UID isolation (inaccessible to other third-party apps on non-rooted devices).
 
-## Network
+### 2. Private Vault Tier (Hardware-Backed Encryption)
+- Highly sensitive documents (National IDs, Passports, Tax Returns, Medical records) can be moved to the **Private Vault**.
+- Encrypted using `androidx.security.crypto.EncryptedFile` with **AES-256-GCM** key encryption (`MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).setUserAuthenticationRequired(true)`).
+- Decryption keys are stored inside the hardware-backed **Android Keystore** (utilizing StrongBox Keymaster where supported).
+- Unlocking requires `BiometricPrompt` authentication (Class 3 Strong Biometrics or device PIN/pattern fallback).
 
-Use HTTPS.
+## Verifiable Permanent Redaction
 
-Do not disable certificate validation.
+Many PDF apps produce "fake redaction" by merely drawing a black rectangle over text without removing the underlying text stream or image data. LocalPDF provides **True Permanent Redaction**:
 
-Only use certificate pinning if the operational trade-offs are understood.
+1. **Raster/Bitmap Burning**: The pixel bounding box is permanently overwritten with solid color directly in the raw bitmap array.
+2. **PDF Vector & Text Stream Stripping**: The PDF stream is parsed with `PDFBox-Android`; text characters, glyphs, and vector commands within the redacted bounding box are removed from the PDF content stream.
+3. **Metadata & EXIF Sanitization**: Author tags, creation software, GPS location tags, and device metadata are stripped.
+4. **Flattening Verification**: Redacted pages are exported as a flattened searchable layer, guaranteeing hidden data cannot be recovered via text-selection or PDF stream decoders.
 
-## Tokens / Sensitive Local Data
+## Safe Sharing Protocol
 
-Minimize sensitive storage.
-
-Use Android Keystore-backed mechanisms where appropriate.
-
-Do not log:
-
-- passwords
-- access tokens
-- refresh tokens
-- auth headers
-- private user data
-- payment secrets
-
-## Authentication
-
-Define:
-
-`[AUTH_METHOD]`
-
-Centralize session behavior.
-
-Handle:
-
-- logged out
-- authenticating
-- authenticated
-- expired session
-- failed refresh
-- logout cleanup
-
-## Authorization
-
-Server remains authoritative.
-
-Do not treat hidden UI controls as security.
-
-## Permissions
-
-Only request permissions when necessary.
-
-Handle:
-
-- granted
-- denied
-- permanently denied
-- feature unavailable
-
-Explain permission purpose contextually.
-
-## Deep Links / App Links
-
-Validate:
-
-- route
-- arguments
-- authentication requirements
-- resource authorization
-
-Do not trust deep-link parameters.
-
-## Intents / Exported Components
-
-Minimize exported components.
-
-Validate incoming intents.
-
-Do not expose internal-only activities/services/providers.
-
-## File Sharing
-
-Prefer `FileProvider`.
-
-Do not expose arbitrary filesystem paths.
-
-Use temporary/least-privilege URI permissions.
-
-## WebView
-
-Avoid WebView when not needed.
-
-If used:
-
-- disable unnecessary capabilities
-- restrict navigation
-- avoid unsafe JavaScript bridges
-- validate loaded origins/content
-
-## Biometrics
-
-Use platform biometric APIs.
-
-Do not build custom biometric verification.
-
-## Screenshots / Clipboard
-
-For highly sensitive screens consider:
-
-- screenshot restrictions
-- clipboard minimization
-- secure input handling
-
-Only when product requirements justify the UX trade-off.
-
-## App-Specific Security
-
-Sensitive data categories:
-
-- `[DATA]`
-
-Compliance:
-
-`[NONE / GDPR / HIPAA / PCI / OTHER]`
-
-Threats to prioritize:
-
-- `[THREAT]`
+When sharing documents outside the app:
+- Optional dynamic watermarking ("CONFIDENTIAL", "FOR VISA APPLICATION ONLY", "COPY").
+- Temporary scoped `FileProvider` URIs (`content://...`) with `FLAG_GRANT_READ_URI_PERMISSION` that expire immediately upon consumption.
+- Automatic warning when sharing unredacted documents containing detected sensitive fields (ID numbers, credit card numbers, bank accounts).

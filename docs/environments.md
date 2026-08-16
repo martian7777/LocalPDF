@@ -1,63 +1,55 @@
-# Environments & Build Configuration
-
-> Fill for each app.
+# Environments & Build Configurations — LocalPDF
 
 ## Build Variants
 
-Recommended:
+LocalPDF defines three primary build variants:
 
-- debug
-- staging
-- release
+1. **`debug`**:
+   - `applicationIdSuffix = ".debug"`
+   - `versionNameSuffix = "-DEBUG"`
+   - `debuggable = true`
+   - StrictMode and LeakCanary enabled
+   - Timber verbose logging enabled
+2. **`release`**:
+   - `isMinifyEnabled = true` (R8 full mode)
+   - `isShrinkResources = true`
+   - ProGuard rules active for OpenCV, ONNX Runtime Mobile, and PDFBox-Android
+   - Logs stripped, zero debugging hooks
+3. **`benchmark`**:
+   - Optimized for Baseline Profile generation and Macrobenchmark execution
 
-Project variants:
+## ABI Split Configuration
 
-- `[VARIANT]`
+To keep download sizes small while including native OpenCV and ONNX Runtime libraries, configure ABI splits:
 
-## Environment Matrix
+```kotlin
+splits {
+    abi {
+        isEnable = true
+        reset()
+        include("arm64-v8a", "armeabi-v7a", "x86_64")
+        isUniversalApk = true
+    }
+}
+```
 
-| Environment | API | Analytics | Logging | Payments/Integrations |
-|---|---|---|---|---|
-| Local/Debug | `[URL]` | `[ON/OFF]` | verbose | sandbox |
-| Staging | `[URL]` | `[ON/OFF]` | controlled | sandbox/test |
-| Production | `[URL]` | production | minimal | production |
+## ProGuard / R8 Rules
 
-## Config Rules
+Crucial keep rules for native JNI and ONNX reflection:
+```proguard
+# ONNX Runtime Mobile
+-keep class ai.onnxruntime.** { *; }
+-keepattributes *Annotation*
 
-- production secrets never belong in source control
-- environment differences should be config-driven
-- debug-only tooling must not leak into release
-- validate required config during build/startup where practical
-- do not silently fall back to insecure defaults
+# OpenCV
+-keep class org.opencv.** { *; }
+-keepclassmembers class * {
+    native <methods>;
+}
 
-## Application IDs
+# PDFBox-Android
+-keep class com.tom_roush.pdfbox.** { *; }
 
-Debug:
-
-`[APPLICATION_ID]`
-
-Staging:
-
-`[APPLICATION_ID]`
-
-Production:
-
-`[APPLICATION_ID]`
-
-## API Endpoints
-
-Debug:
-
-`[URL]`
-
-Staging:
-
-`[URL]`
-
-Production:
-
-`[URL]`
-
-## Feature Flags
-
-`[STRATEGY / NONE]`
+# Room SQLite FTS
+-keep class androidx.room.** { *; }
+```
