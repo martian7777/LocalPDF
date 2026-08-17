@@ -88,6 +88,7 @@ class LibraryViewModelTest {
         advanceUntilIdle()
 
         viewModel.onAction(LibraryAction.DeleteRequested(doc))
+        advanceUntilIdle()
         assertEquals(doc, viewModel.state.value.pendingDelete)
 
         viewModel.onAction(LibraryAction.DeleteConfirmed)

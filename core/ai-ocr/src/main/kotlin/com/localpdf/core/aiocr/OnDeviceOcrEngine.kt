@@ -28,13 +28,101 @@ class OnDeviceOcrEngine(private val context: Context) : Closeable {
     private val mutex = Mutex()
     private val environment by lazy { OrtEnvironment.getEnvironment() }
     private val dictionary by lazy { loadDictionary() }
-    private val recognitionSession by lazy { createSession("models/rec/inference.onnx", REC_SHA) }
+    private val recognitionSessionLazy = lazy { createSession("models/rec/inference.onnx", REC_SHA) }
+    private val detectionSessionLazy = lazy { createSession("models/det/inference.onnx", DET_SHA) }
+    private val recognitionSession by recognitionSessionLazy
+    private val detectionSession by detectionSessionLazy
 
     suspend fun recognizePage(imagePath: String, pageId: String): List<OcrBlock> = mutex.withLock {
         withContext(Dispatchers.Default) {
             val bitmap = requireNotNull(BitmapFactory.decodeFile(imagePath)) { "Unable to decode OCR page" }
-            try { detectLines(bitmap).mapNotNull { rect -> recognizeLine(bitmap, rect, pageId) } } finally { bitmap.recycle() }
+            try { detectRegions(bitmap).mapNotNull { rect -> recognizeLine(bitmap, rect, pageId) } } finally { bitmap.recycle() }
         }
+    }
+
+    /** Prefers the shipped DBNet detector; falls back to classical morphology if the model output is unexpected. */
+    private fun detectRegions(bitmap: Bitmap): List<Rect> = try {
+        detectTextRegionsWithModel(bitmap).ifEmpty { detectLines(bitmap) }
+    } catch (error: Exception) {
+        detectLines(bitmap)
+    }
+
+    private fun detectTextRegionsWithModel(bitmap: Bitmap): List<Rect> {
+        val stride = 32
+        val resizeLong = 960
+        val longSide = maxOf(bitmap.width, bitmap.height).toFloat()
+        val scale = resizeLong / longSide
+        val targetWidth = (((bitmap.width * scale).toInt().coerceAtLeast(stride) + stride - 1) / stride) * stride
+        val targetHeight = (((bitmap.height * scale).toInt().coerceAtLeast(stride) + stride - 1) / stride) * stride
+        val resized = Bitmap.createScaledBitmap(bitmap, targetWidth, targetHeight, true)
+        val input = FloatArray(3 * targetHeight * targetWidth)
+        val pixels = IntArray(targetWidth * targetHeight)
+        resized.getPixels(pixels, 0, targetWidth, 0, 0, targetWidth, targetHeight)
+        // NormalizeImage applies mean/std positionally to the BGR-ordered tensor produced by DecodeImage(img_mode: BGR).
+        val mean = floatArrayOf(0.485f, 0.456f, 0.406f)
+        val std = floatArrayOf(0.229f, 0.224f, 0.225f)
+        for (y in 0 until targetHeight) for (x in 0 until targetWidth) {
+            val pixel = pixels[y * targetWidth + x]
+            val bgr = floatArrayOf((pixel and 0xff) / 255f, ((pixel shr 8) and 0xff) / 255f, ((pixel shr 16) and 0xff) / 255f)
+            for (channel in 0..2) input[channel * targetHeight * targetWidth + y * targetWidth + x] = (bgr[channel] - mean[channel]) / std[channel]
+        }
+        if (resized !== bitmap) resized.recycle()
+
+        OnnxTensor.createTensor(environment, FloatBuffer.wrap(input), longArrayOf(1, 3, targetHeight.toLong(), targetWidth.toLong())).use { tensor ->
+            detectionSession.run(mapOf(detectionSession.inputNames.first() to tensor)).use { output ->
+                val probabilityMap = extractProbabilityMap(requireNotNull(output[0].value))
+                return decodeProbabilityMap(probabilityMap, targetHeight, targetWidth, bitmap.width, bitmap.height)
+            }
+        }
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun extractProbabilityMap(raw: Any): Array<FloatArray> = when (val outer = (raw as Array<*>)[0]) {
+        is Array<*> -> when (outer[0]) {
+            is Array<*> -> (outer as Array<Array<FloatArray>>)[0] // rank 4: [1][channels][H][W] -> take channel 0
+            is FloatArray -> outer as Array<FloatArray> // rank 3: [1][H][W]
+            else -> error("Unsupported detection output shape")
+        }
+        else -> error("Unsupported detection output shape")
+    }
+
+    private fun decodeProbabilityMap(probability: Array<FloatArray>, mapHeight: Int, mapWidth: Int, originalWidth: Int, originalHeight: Int): List<Rect> {
+        val binary = Mat(mapHeight, mapWidth, CvType.CV_8UC1)
+        val flatBytes = ByteArray(mapWidth * mapHeight)
+        for (y in 0 until mapHeight) for (x in 0 until mapWidth) flatBytes[y * mapWidth + x] = if (probability[y][x] > DET_PROB_THRESHOLD) (-1).toByte() else 0
+        binary.put(0, 0, flatBytes)
+        val contours = mutableListOf<MatOfPoint>()
+        val hierarchy = Mat()
+        val scaleX = originalWidth.toFloat() / mapWidth
+        val scaleY = originalHeight.toFloat() / mapHeight
+        try {
+            Imgproc.findContours(binary, contours, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE)
+            return contours.mapNotNull { contour ->
+                val box = Imgproc.boundingRect(contour)
+                if (box.width < 3 || box.height < 3) return@mapNotNull null
+                val score = boxScore(probability, box, mapWidth, mapHeight)
+                if (score < DET_BOX_THRESHOLD) return@mapNotNull null
+                unclipAndScale(box, mapWidth, mapHeight, scaleX, scaleY)
+            }.sortedWith(compareBy<Rect> { it.y }.thenBy { it.x }).take(300)
+        } finally { contours.forEach(Mat::release); hierarchy.release(); binary.release() }
+    }
+
+    private fun boxScore(probability: Array<FloatArray>, box: Rect, mapWidth: Int, mapHeight: Int): Float {
+        var sum = 0f; var count = 0
+        for (y in box.y until (box.y + box.height).coerceAtMost(mapHeight)) for (x in box.x until (box.x + box.width).coerceAtMost(mapWidth)) { sum += probability[y][x]; count++ }
+        return if (count == 0) 0f else sum / count
+    }
+
+    /** Expands the box outward by DBPostProcess's unclip formula (area * ratio / perimeter) before rescaling to source pixels. */
+    private fun unclipAndScale(box: Rect, mapWidth: Int, mapHeight: Int, scaleX: Float, scaleY: Float): Rect {
+        val perimeter = 2.0 * (box.width + box.height)
+        val area = box.width.toDouble() * box.height.toDouble()
+        val distance = if (perimeter <= 0) 0.0 else area * DET_UNCLIP_RATIO / perimeter
+        val left = (box.x - distance).coerceAtLeast(0.0)
+        val top = (box.y - distance).coerceAtLeast(0.0)
+        val right = (box.x + box.width + distance).coerceAtMost(mapWidth.toDouble())
+        val bottom = (box.y + box.height + distance).coerceAtMost(mapHeight.toDouble())
+        return Rect((left * scaleX).toInt(), (top * scaleY).toInt(), ((right - left) * scaleX).toInt().coerceAtLeast(1), ((bottom - top) * scaleY).toInt().coerceAtLeast(1))
     }
 
     private fun detectLines(bitmap: Bitmap): List<Rect> {
@@ -53,6 +141,7 @@ class OnDeviceOcrEngine(private val context: Context) : Closeable {
 
     private fun recognizeLine(source: Bitmap, rect: Rect, pageId: String): OcrBlock? {
         val safe = Rect(rect.x.coerceAtLeast(0), rect.y.coerceAtLeast(0), rect.width.coerceAtMost(source.width - rect.x), rect.height.coerceAtMost(source.height - rect.y))
+        if (safe.width <= 0 || safe.height <= 0) return null
         val crop = Bitmap.createBitmap(source, safe.x, safe.y, safe.width, safe.height)
         val targetWidth = (48f * safe.width / safe.height).toInt().coerceIn(16, 320)
         val scaled = Bitmap.createScaledBitmap(crop, targetWidth, 48, true)
@@ -98,6 +187,16 @@ class OnDeviceOcrEngine(private val context: Context) : Closeable {
         return environment.createSession(bytes, options).also { options.close() }
     }
 
-    override fun close() { recognitionSession.close() }
-    companion object { private const val REC_SHA = "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092" }
+    override fun close() {
+        if (recognitionSessionLazy.isInitialized()) recognitionSessionLazy.value.close()
+        if (detectionSessionLazy.isInitialized()) detectionSessionLazy.value.close()
+    }
+
+    companion object {
+        private const val REC_SHA = "da72dc72ca4dc220df0dfde68c1dedc31c58d3e76a25871122e5056227d50092"
+        private const val DET_SHA = "a431985659dc921974177a95adcfbb90fd9e51989a5e04d70d0b75f597b6e61d"
+        private const val DET_PROB_THRESHOLD = 0.3f
+        private const val DET_BOX_THRESHOLD = 0.6f
+        private const val DET_UNCLIP_RATIO = 1.5
+    }
 }
