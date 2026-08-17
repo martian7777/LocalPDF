@@ -102,7 +102,15 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.fragment.ktx)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     testImplementation(libs.junit)
+}
+
+tasks.register<Copy>("collectReleaseArtifacts") {
+    dependsOn("assembleRelease", "bundleRelease")
+    into(layout.buildDirectory.dir("outputs/release"))
+    from(layout.buildDirectory.file("outputs/apk/release/app-release.apk")) { rename { "localpdf-0.1.0-universal-release.apk" } }
+    from(layout.buildDirectory.file("outputs/bundle/release/app-release.aab")) { rename { "localpdf-0.1.0-release.aab" } }
 }

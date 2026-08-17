@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.compose.LocalActivity
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -193,7 +194,7 @@ private fun LocalPdfApp(
         if (openDocumentId != null) {
             val viewer: ViewerViewModel = viewModel(key = openDocumentId, factory = ViewerViewModel.Factory(openDocumentId!!, documentRepository))
             val viewerState by viewer.state.collectAsStateWithLifecycle()
-            val activity = LocalContext.current as FragmentActivity
+            val activity = requireNotNull(LocalActivity.current) as FragmentActivity
             DocumentViewerScreen(viewerState, viewer::onAction, onBack = { openDocumentId = null }, onMoveToVault = { id -> VaultAuthenticator.authenticate(activity, "Protect document", onSuccess = { appScope.launch { vaultRepository.moveToVault(id).onSuccess { openDocumentId = null; destination = AppDestination.Vault }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, onError = { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) }, onCreateRedactedCopy = { id, regions -> appScope.launch { redactionRepository.createPermanentCopy(id, regions).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Verified flattened copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(20.dp))
         } else if (scannerOpen) {
             if (cameraGranted) {
@@ -331,7 +332,7 @@ private fun DestinationContent(
 }
 
 @Composable private fun VaultRoute(factory: VaultViewModel.Factory) {
-    val vm: VaultViewModel = viewModel(factory = factory); val documents by vm.documents.collectAsStateWithLifecycle(); val activity = LocalContext.current as FragmentActivity
+    val vm: VaultViewModel = viewModel(factory = factory); val documents by vm.documents.collectAsStateWithLifecycle(); val activity = requireNotNull(LocalActivity.current) as FragmentActivity
     fun auth(title: String, action: () -> Unit) = VaultAuthenticator.authenticate(activity, title, action) { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }
     VaultScreen(documents, onUnlock = { doc -> auth("Unlock ${doc.title}") { vm.open(doc.id, { Toast.makeText(activity, "Unlocked temporary copy created", Toast.LENGTH_SHORT).show() }, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } }, onRestore = { doc -> auth("Restore ${doc.title}") { vm.restore(doc.id, {}, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } })
 }

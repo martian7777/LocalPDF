@@ -107,4 +107,26 @@ object PdfEngine {
     }
 
     private fun overlaps(a: com.localpdf.core.model.BoundingBox, b: com.localpdf.core.model.BoundingBox): Boolean = a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
+
+    data class EditPage(val image: File, val rotationDegrees: Int = 0)
+    fun createEditedPdf(pages: List<EditPage>, output: File, watermark: String? = null, jpegQuality: Int = 90): File {
+        require(pages.isNotEmpty()) { "Keep at least one page" }; require(jpegQuality in 40..100) { "Quality must be between 40 and 100" }
+        val document = PdfDocument()
+        try {
+            pages.forEachIndexed { index, edit ->
+                val source = requireNotNull(BitmapFactory.decodeFile(edit.image.absolutePath)); val rotation = ((edit.rotationDegrees % 360) + 360) % 360
+                require(rotation in setOf(0, 90, 180, 270)) { "Rotation must be a quarter turn" }
+                val matrix = android.graphics.Matrix().apply { postRotate(rotation.toFloat()) }
+                val rotated = if (rotation == 0) source else Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+                val compressed = java.io.ByteArrayOutputStream().use { bytes -> rotated.compress(Bitmap.CompressFormat.JPEG, jpegQuality, bytes); BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size()) }
+                val page = document.startPage(PdfDocument.PageInfo.Builder(compressed.width, compressed.height, index + 1).create()); page.canvas.drawBitmap(compressed, 0f, 0f, null)
+                watermark?.trim()?.takeIf(String::isNotEmpty)?.let { text -> val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(90, 120, 0, 0); textSize = (compressed.width / 12f).coerceAtLeast(24f); textAlign = Paint.Align.CENTER }; page.canvas.save(); page.canvas.rotate(-30f, compressed.width / 2f, compressed.height / 2f); page.canvas.drawText(text.take(80), compressed.width / 2f, compressed.height / 2f, paint); page.canvas.restore() }
+                document.finishPage(page); compressed.recycle(); if (rotated !== source) rotated.recycle(); source.recycle()
+            }
+            output.parentFile?.mkdirs(); output.outputStream().use(document::writeTo); return output
+        } finally { document.close() }
+    }
+
+    fun splitToPdfs(pages: List<File>, outputDirectory: File, jpegQuality: Int = 90): List<File> = pages.mapIndexed { index, file -> createEditedPdf(listOf(EditPage(file)), File(outputDirectory, "page-${index + 1}.pdf"), jpegQuality = jpegQuality) }
+    fun mergeToPdf(pageImages: List<File>, output: File, jpegQuality: Int = 90): File = createEditedPdf(pageImages.map(::EditPage), output, jpegQuality = jpegQuality)
 }

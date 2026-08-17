@@ -24,3 +24,17 @@ Release keys must never be committed to Git. Managed via environment variables i
 - `LOCALPDF_KEYSTORE_PASSWORD`
 - `LOCALPDF_KEY_ALIAS`
 - `LOCALPDF_KEY_PASSWORD`
+
+## Local production build
+
+The keystore must live outside the repository. Set `LOCALPDF_KEYSTORE_PATH`,
+`LOCALPDF_KEYSTORE_PASSWORD`, and `LOCALPDF_KEY_PASSWORD`; the alias defaults to
+`localpdf-release` and can be overridden with `LOCALPDF_KEY_ALIAS`.
+
+Run `gradlew :app:collectReleaseArtifacts`. Outputs are copied to
+`app/build/outputs/release/localpdf-0.1.0-release.aab` and
+`app/build/outputs/release/localpdf-0.1.0-universal-release.apk`.
+
+Back up the keystore in two encrypted, user-controlled locations. Losing it can
+prevent future direct-install upgrades. Never commit it, its passwords, or a
+password-bearing command transcript.
