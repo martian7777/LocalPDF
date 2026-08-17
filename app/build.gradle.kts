@@ -4,6 +4,11 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val releaseStorePath = providers.environmentVariable("LOCALPDF_KEYSTORE_PATH")
+val releaseStorePassword = providers.environmentVariable("LOCALPDF_KEYSTORE_PASSWORD")
+val releaseKeyPassword = providers.environmentVariable("LOCALPDF_KEY_PASSWORD")
+val releaseKeyAlias = providers.environmentVariable("LOCALPDF_KEY_ALIAS").orElse("localpdf-release")
+
 android {
     namespace = "com.localpdf"
     compileSdk = 35
@@ -18,6 +23,21 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    signingConfigs {
+        create("production") {
+            if (releaseStorePath.isPresent && releaseStorePassword.isPresent && releaseKeyPassword.isPresent) {
+                storeFile = file(releaseStorePath.get())
+                storePassword = releaseStorePassword.get()
+                keyAlias = releaseKeyAlias.get()
+                keyPassword = releaseKeyPassword.get()
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
+        }
+    }
+
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
@@ -26,6 +46,7 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            signingConfig = signingConfigs.getByName("production")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -36,6 +57,24 @@ android {
     }
 
     packaging.resources.excludes += "/META-INF/{AL2.0,LGPL2.1}"
+}
+
+gradle.taskGraph.whenReady {
+    val releaseRequested = allTasks.any { task ->
+        task.project == project && (task.name.contains("Release", ignoreCase = true) || task.name == "bundleRelease")
+    }
+    if (releaseRequested) {
+        val missing = buildList {
+            if (!releaseStorePath.isPresent) add("LOCALPDF_KEYSTORE_PATH")
+            if (!releaseStorePassword.isPresent) add("LOCALPDF_KEYSTORE_PASSWORD")
+            if (!releaseKeyPassword.isPresent) add("LOCALPDF_KEY_PASSWORD")
+        }
+        require(missing.isEmpty()) { "Release signing is unavailable. Set: ${missing.joinToString()}" }
+        require(file(releaseStorePath.get()).isFile) { "LOCALPDF_KEYSTORE_PATH must point to an external keystore file" }
+        require(!file(releaseStorePath.get()).canonicalPath.startsWith(rootDir.canonicalPath)) {
+            "The production keystore must be stored outside the Git repository"
+        }
+    }
 }
 
 dependencies {

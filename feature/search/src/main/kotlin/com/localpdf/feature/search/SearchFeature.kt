@@ -22,6 +22,7 @@ import com.localpdf.core.data.SearchRepository
 import com.localpdf.core.designsystem.GlassSurface
 import com.localpdf.core.model.SearchResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -33,7 +34,7 @@ import kotlinx.coroutines.flow.stateIn
 data class SearchUiState(val query: String = "", val results: List<SearchResult> = emptyList(), val hasSearched: Boolean = false)
 sealed interface SearchAction { data class QueryChanged(val value: String) : SearchAction; data class ResultClicked(val documentId: String) : SearchAction }
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class, FlowPreview::class)
 class SearchViewModel(private val repository: SearchRepository) : ViewModel() {
     private val query = MutableStateFlow("")
     val state: StateFlow<SearchUiState> = query.debounce(250).flatMapLatest { value -> repository.search(value).map { value to it } }

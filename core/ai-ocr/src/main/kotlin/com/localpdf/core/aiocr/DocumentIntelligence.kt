@@ -28,7 +28,7 @@ object DocumentIntelligence {
     }.distinctBy { it.type to it.value }
 
     private fun find(regex: Regex, text: String) = regex.find(text)?.groupValues?.get(1)
-    private val INVOICE = Regex("(?i)(?:invoice|inv)[ #.:_-]*(?:no[.: ]*)?([A-Z0-9-]{3,})")
+    private val INVOICE = Regex("(?i)(?:invoice|inv)(?:\\s*(?:number|no\\.?|#|:|-))*\\s+([A-Z0-9-]*\\d[A-Z0-9-]*)")
     private val EMAIL = Regex("[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}", RegexOption.IGNORE_CASE)
     private val PHONE = Regex("(?<!\\d)(?:\\+?\\d[\\d ()-]{7,}\\d)(?!\\d)")
     private val IBAN = Regex("\\b[A-Z]{2}\\d{2}(?: ?[A-Z0-9]){11,30}\\b")

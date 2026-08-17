@@ -1,2 +1,4 @@
 -dontwarn java.lang.invoke.StringConcatFactory
-
+-keep class ai.onnxruntime.** { *; }
+-keep class org.opencv.** { *; }
+-keepattributes *Annotation*
