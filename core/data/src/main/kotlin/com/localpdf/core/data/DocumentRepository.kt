@@ -2,6 +2,7 @@ package com.localpdf.core.data
 
 import com.localpdf.core.model.Document
 import com.localpdf.core.model.DocumentPage
+import java.io.File
 import kotlinx.coroutines.flow.Flow
 
 interface DocumentRepository {
@@ -14,6 +15,7 @@ interface DocumentRepository {
     suspend fun rename(id: String, title: String): Result<Unit>
     suspend fun correctOcr(documentId: String, blockId: String, text: String): Result<Unit>
     suspend fun delete(id: String): Result<Unit>
+    suspend fun prepareShareCopy(id: String): Result<File>
 }
 
 class DuplicateDocumentException : IllegalArgumentException("This document is already in your library")

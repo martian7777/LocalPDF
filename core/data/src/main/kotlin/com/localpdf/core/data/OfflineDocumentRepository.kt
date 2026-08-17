@@ -146,6 +146,19 @@ class OfflineDocumentRepository(
         }
     }
 
+    override suspend fun prepareShareCopy(id: String): Result<File> = runCatching {
+        withContext(Dispatchers.IO) {
+            val document = requireNotNull(dao.getById(id))
+            require(!document.isVaulted) { "Restore the document from the vault before sharing" }
+            val source = File(document.filePath)
+            require(source.isFile) { "Document is still processing" }
+            val safeName = document.title.replace(Regex("[^A-Za-z0-9 _.-]"), "_").ifBlank { "document" }
+            val target = File(context.cacheDir, "shared/$safeName.${source.extension.ifBlank { "pdf" }}").apply { parentFile?.mkdirs() }
+            source.copyTo(target, overwrite = true)
+            target
+        }
+    }
+
     private fun sniffMime(uri: Uri): String {
         val bytes: ByteArray = context.contentResolver.openInputStream(uri).use { it?.readNBytes(12) } ?: byteArrayOf()
         return when {

@@ -23,6 +23,8 @@ import com.localpdf.core.model.DocumentPage
 import com.localpdf.core.model.OcrBlock
 import com.localpdf.feature.ocredit.OcrCorrectionDialog
 import com.localpdf.feature.redaction.RedactionDialog
+import com.localpdf.feature.editor.EditorDialog
+import com.localpdf.feature.editor.PageEditState
 import com.localpdf.core.model.RedactionRegion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
@@ -45,13 +47,30 @@ class ViewerViewModel(private val id: String, private val repository: DocumentRe
 }
 
 @Composable
-fun DocumentViewerScreen(state: ViewerUiState, onAction: (ViewerAction) -> Unit, onBack: () -> Unit, onMoveToVault: (String) -> Unit, onCreateRedactedCopy: (String, List<RedactionRegion>) -> Unit, modifier: Modifier = Modifier) {
+fun DocumentViewerScreen(
+    state: ViewerUiState,
+    onAction: (ViewerAction) -> Unit,
+    onBack: () -> Unit,
+    onMoveToVault: (String) -> Unit,
+    onCreateRedactedCopy: (String, List<RedactionRegion>) -> Unit,
+    onCreateEditedCopy: (String, List<PageEditState>, String?) -> Unit,
+    onShare: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var showRedaction by remember { mutableStateOf(false) }
+    var showEditor by remember { mutableStateOf(false) }
     Column(modifier.fillMaxSize()) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Back to library") }
             Column(Modifier.weight(1f)) { Text(state.document?.title ?: "Loading document", style = MaterialTheme.typography.titleLarge); Text("Tap recognized text to correct it", style = MaterialTheme.typography.bodySmall) }
-            state.document?.takeIf { !it.isVaulted }?.let { document -> Column { TextButton(onClick = { showRedaction = true }) { Text("Redact") }; TextButton(onClick = { onMoveToVault(document.id) }) { Text("Vault") } } }
+            state.document?.takeIf { !it.isVaulted }?.let { document ->
+                Column {
+                    TextButton(onClick = { showEditor = true }) { Text("Edit") }
+                    TextButton(onClick = { showRedaction = true }) { Text("Redact") }
+                    TextButton(onClick = { onShare(document.id) }) { Text("Share") }
+                    TextButton(onClick = { onMoveToVault(document.id) }) { Text("Vault") }
+                }
+            }
         }
         Spacer(Modifier.height(12.dp))
         if (state.document == null) CircularProgressIndicator() else LazyColumn(verticalArrangement = Arrangement.spacedBy(20.dp), contentPadding = PaddingValues(bottom = 32.dp)) {
@@ -60,6 +79,7 @@ fun DocumentViewerScreen(state: ViewerUiState, onAction: (ViewerAction) -> Unit,
     }
     state.selected?.let { block -> OcrCorrectionDialog(block, { onAction(ViewerAction.DismissCorrection) }, { onAction(ViewerAction.SaveCorrection(it)) }) }
     if (showRedaction) RedactionDialog(state.pages, { showRedaction = false }) { regions -> state.document?.let { onCreateRedactedCopy(it.id, regions) }; showRedaction = false }
+    if (showEditor) EditorDialog(state.pages, { showEditor = false }) { edits, watermark -> state.document?.let { onCreateEditedCopy(it.id, edits, watermark) }; showEditor = false }
 }
 
 @Composable private fun PageCard(page: DocumentPage, onAction: (ViewerAction) -> Unit) {

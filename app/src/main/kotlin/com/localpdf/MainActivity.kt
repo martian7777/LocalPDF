@@ -76,6 +76,9 @@ import com.localpdf.core.designsystem.LocalPdfTheme
 import com.localpdf.core.data.OfflineDocumentRepository
 import com.localpdf.core.data.OfflineSearchRepository
 import com.localpdf.core.data.OfflineRedactionRepository
+import com.localpdf.core.data.EditorPageEdit
+import com.localpdf.core.data.EditorRepository
+import com.localpdf.core.data.OfflineEditorRepository
 import com.localpdf.feature.library.LibraryAction
 import com.localpdf.feature.library.LibraryEffect
 import com.localpdf.feature.library.LibraryScreen
@@ -116,6 +119,7 @@ class MainActivity : FragmentActivity() {
         val libraryFactory = LibraryViewModel.Factory(documentRepository)
         val searchFactory = SearchViewModel.Factory(OfflineSearchRepository.create(applicationContext))
         val redactionRepository = OfflineRedactionRepository.create(applicationContext)
+        val editorRepository = OfflineEditorRepository.create(applicationContext)
         val vaultFactory = VaultViewModel.Factory(vaultRepository)
         setContent {
             LocalPdfTheme {
@@ -137,6 +141,7 @@ class MainActivity : FragmentActivity() {
                     vaultFactory = vaultFactory,
                     vaultRepository = vaultRepository,
                     redactionRepository = redactionRepository,
+                    editorRepository = editorRepository,
                 )
             }
         }
@@ -169,6 +174,7 @@ private fun LocalPdfApp(
     vaultFactory: VaultViewModel.Factory,
     vaultRepository: VaultRepository,
     redactionRepository: com.localpdf.core.data.RedactionRepository,
+    editorRepository: EditorRepository,
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     val layoutMode = when {
@@ -195,7 +201,16 @@ private fun LocalPdfApp(
             val viewer: ViewerViewModel = viewModel(key = openDocumentId, factory = ViewerViewModel.Factory(openDocumentId!!, documentRepository))
             val viewerState by viewer.state.collectAsStateWithLifecycle()
             val activity = requireNotNull(LocalActivity.current) as FragmentActivity
-            DocumentViewerScreen(viewerState, viewer::onAction, onBack = { openDocumentId = null }, onMoveToVault = { id -> VaultAuthenticator.authenticate(activity, "Protect document", onSuccess = { appScope.launch { vaultRepository.moveToVault(id).onSuccess { openDocumentId = null; destination = AppDestination.Vault }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, onError = { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) }, onCreateRedactedCopy = { id, regions -> appScope.launch { redactionRepository.createPermanentCopy(id, regions).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Verified flattened copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(20.dp))
+            DocumentViewerScreen(
+                viewerState,
+                viewer::onAction,
+                onBack = { openDocumentId = null },
+                onMoveToVault = { id -> VaultAuthenticator.authenticate(activity, "Protect document", onSuccess = { appScope.launch { vaultRepository.moveToVault(id).onSuccess { openDocumentId = null; destination = AppDestination.Vault }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, onError = { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) },
+                onCreateRedactedCopy = { id, regions -> appScope.launch { redactionRepository.createPermanentCopy(id, regions).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Verified flattened copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } },
+                onCreateEditedCopy = { id, edits, watermark -> appScope.launch { editorRepository.createEditedCopy(id, edits.map { EditorPageEdit(it.pageId, it.rotationDegrees, it.deleted) }, watermark).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Edited copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } },
+                onShare = { id -> appScope.launch { documentRepository.prepareShareCopy(id).onSuccess { file -> val uri = androidx.core.content.FileProvider.getUriForFile(activity, "${activity.packageName}.files", file); val mime = if (file.extension == "pdf") "application/pdf" else "image/*"; val intent = Intent(Intent.ACTION_SEND).apply { type = mime; putExtra(Intent.EXTRA_STREAM, uri); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }; activity.startActivity(Intent.createChooser(intent, "Share document")) }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } },
+                modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(20.dp),
+            )
         } else if (scannerOpen) {
             if (cameraGranted) {
                 ScannerScreen(

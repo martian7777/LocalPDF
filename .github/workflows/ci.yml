@@ -33,10 +33,10 @@ jobs:
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Run Detekt & Kotlin Linter
-        run: ./gradlew detekt --continue || true
+        run: ./gradlew detekt --continue
 
       - name: Run Android Lint (Debug)
-        run: ./gradlew lintDebug --continue || true
+        run: ./gradlew lintDebug --continue
 
       - name: Upload Lint Reports
         if: always()
@@ -67,7 +67,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Run Unit Tests
-        run: ./gradlew testDebugUnitTest --continue || true
+        run: ./gradlew testDebugUnitTest --continue
 
       - name: Upload Test Results
         if: always()
@@ -97,7 +97,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
 
       - name: Assemble Debug APK
-        run: ./gradlew assembleDebug || true
+        run: ./gradlew assembleDebug
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
