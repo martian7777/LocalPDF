@@ -31,13 +31,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CameraAlt
-import androidx.compose.material.icons.outlined.Description
-import androidx.compose.material.icons.outlined.FolderOpen
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.PrivacyTip
-import androidx.compose.material.icons.outlined.Search
-import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -110,10 +108,10 @@ private enum class AppDestination(
     val label: String,
     val icon: ImageVector,
 ) {
-    Library("Library", Icons.Outlined.FolderOpen),
-    Search("Search", Icons.Outlined.Search),
-    Vault("Vault", Icons.Outlined.Lock),
-    Settings("Privacy", Icons.Outlined.Settings),
+    Library("Library", Icons.Filled.Home),
+    Search("Search", Icons.Filled.Search),
+    Vault("Vault", Icons.Filled.Info),
+    Settings("Privacy", Icons.Filled.Settings),
 }
 
 private enum class LayoutMode { Compact, Medium, Expanded }
@@ -193,7 +191,7 @@ private fun CompactShell(
         floatingActionButton = {
             if (destination == AppDestination.Library) {
                 FloatingActionButton(onClick = onScan) {
-                    Icon(Icons.Outlined.CameraAlt, contentDescription = "Scan document")
+                    Icon(Icons.Filled.Add, contentDescription = "Scan document")
                 }
             }
         },
@@ -215,7 +213,7 @@ private fun WideShell(
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.72f),
             header = {
                 Box(Modifier.padding(16.dp).size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primary), contentAlignment = Alignment.Center) {
-                    Icon(Icons.Outlined.Description, contentDescription = "LocalPDF", tint = Color.White)
+                    Icon(Icons.Filled.Home, contentDescription = "LocalPDF", tint = Color.White)
                 }
             },
         ) {
@@ -248,8 +246,8 @@ private fun DestinationContent(
         Text(destination.label, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         when (destination) {
             AppDestination.Library -> LibraryEmptyState(expanded, onScan)
-            AppDestination.Search -> EmptyFeatureCard(Icons.Outlined.Search, "Search every page", "Your on-device full-text index will appear here after the first document is processed.")
-            AppDestination.Vault -> EmptyFeatureCard(Icons.Outlined.Lock, "Private Vault", "Biometric-protected documents stay encrypted and available only on this device.")
+            AppDestination.Search -> EmptyFeatureCard(Icons.Filled.Search, "Search every page", "Your on-device full-text index will appear here after the first document is processed.")
+            AppDestination.Vault -> EmptyFeatureCard(Icons.Filled.Info, "Private Vault", "Biometric-protected documents stay encrypted and available only on this device.")
             AppDestination.Settings -> PrivacyDashboard()
         }
     }
@@ -264,11 +262,11 @@ private fun LibraryEmptyState(expanded: Boolean, onScan: () -> Unit) {
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Icon(Icons.Outlined.Description, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary)
+            Icon(Icons.Filled.Home, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary)
             Text("Your private document workspace", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)
             Text("Scan your first page. Processing, OCR, search, and storage remain on your device.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f))
             Button(onClick = onScan, contentPadding = PaddingValues(horizontal = 22.dp, vertical = 14.dp)) {
-                Icon(Icons.Outlined.CameraAlt, contentDescription = null)
+                Icon(Icons.Filled.Add, contentDescription = null)
                 Spacer(Modifier.width(10.dp))
                 Text("Scan document")
             }
@@ -291,7 +289,7 @@ private fun EmptyFeatureCard(icon: ImageVector, title: String, detail: String) {
 private fun PrivacyDashboard() {
     GlassSurface(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(28.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Icon(Icons.Outlined.PrivacyTip, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.secondary)
+            Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.secondary)
             Text("Zero-egress by design", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
             Metric("Documents uploaded", "0")
             Metric("Third-party trackers", "0")
@@ -326,7 +324,7 @@ private fun ScannerPlaceholder(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(18.dp),
         ) {
-            Icon(Icons.Outlined.CameraAlt, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color(0xFF818CF8))
+            Icon(Icons.Filled.Add, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color(0xFF818CF8))
             Text(
                 when {
                     cameraGranted -> "Camera engine is the next MVP slice"
