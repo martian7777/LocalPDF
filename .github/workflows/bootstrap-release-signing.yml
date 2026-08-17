@@ -1,0 +1,93 @@
+name: Bootstrap Release Signing
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: Type CREATE to generate a new release signing key
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  bootstrap:
+    if: inputs.confirm == 'CREATE'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Validate bootstrap secrets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.LOCALPDF_SECRET_BOOTSTRAP_TOKEN }}
+          SIGNING_PASSWORD: ${{ secrets.LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD }}
+        run: |
+          test -n "$GH_TOKEN" || { echo "Missing LOCALPDF_SECRET_BOOTSTRAP_TOKEN"; exit 1; }
+          test -n "$SIGNING_PASSWORD" || { echo "Missing LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD"; exit 1; }
+          test "${#SIGNING_PASSWORD}" -ge 16 || { echo "LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD must contain at least 16 characters"; exit 1; }
+          existing=$(gh secret list --repo "$GITHUB_REPOSITORY" --json name --jq '.[].name' |
+            grep -E '^LOCALPDF_(KEYSTORE_BASE64|KEYSTORE_PASSWORD|KEY_PASSWORD|KEY_ALIAS)$' || true)
+          test -z "$existing" || {
+            echo "Release signing secrets already exist; refusing to replace the signing identity."
+            echo "$existing"
+            exit 1
+          }
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Generate release keystore
+        shell: bash
+        env:
+          SIGNING_PASSWORD: ${{ secrets.LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD }}
+          KEY_ALIAS: localpdf-release
+        run: |
+          keytool -genkeypair \
+            -keystore "$RUNNER_TEMP/localpdf-release.jks" \
+            -storetype PKCS12 \
+            -storepass "$SIGNING_PASSWORD" \
+            -keypass "$SIGNING_PASSWORD" \
+            -alias "$KEY_ALIAS" \
+            -keyalg RSA \
+            -keysize 2048 \
+            -validity 10000 \
+            -dname "CN=LocalPDF, OU=Release, O=LocalPDF, L=Unknown, ST=Unknown, C=US"
+          chmod 600 "$RUNNER_TEMP/localpdf-release.jks"
+
+      - name: Save release signing secrets
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.LOCALPDF_SECRET_BOOTSTRAP_TOKEN }}
+          SIGNING_PASSWORD: ${{ secrets.LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD }}
+          KEY_ALIAS: localpdf-release
+        run: |
+          base64 -w 0 "$RUNNER_TEMP/localpdf-release.jks" | gh secret set LOCALPDF_KEYSTORE_BASE64 --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$SIGNING_PASSWORD" | gh secret set LOCALPDF_KEYSTORE_PASSWORD --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$SIGNING_PASSWORD" | gh secret set LOCALPDF_KEY_PASSWORD --repo "$GITHUB_REPOSITORY"
+          printf '%s' "$KEY_ALIAS" | gh secret set LOCALPDF_KEY_ALIAS --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload one-day keystore backup
+        uses: actions/upload-artifact@v4
+        with:
+          name: localpdf-release-keystore-BACK-UP-NOW
+          path: ${{ runner.temp }}/localpdf-release.jks
+          if-no-files-found: error
+          retention-days: 1
+          compression-level: 0
+
+      - name: Write recovery instructions
+        shell: bash
+        run: |
+          {
+            echo "## Release signing initialized"
+            echo
+            echo "The four LOCALPDF release signing secrets are configured."
+            echo
+            echo "Download the **localpdf-release-keystore-BACK-UP-NOW** artifact before it expires,"
+            echo "store it in two encrypted locations, and retain the bootstrap signing password."
+            echo "Then delete the two LOCALPDF_*_BOOTSTRAP_* repository secrets and this workflow run."
+          } >> "$GITHUB_STEP_SUMMARY"

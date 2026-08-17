@@ -41,6 +41,29 @@ password-bearing command transcript.
 
 ## GitHub Actions secrets
 
+### Bootstrap entirely in GitHub Actions
+
+No local JDK or Android Studio is required. Before running the bootstrap, create
+these temporary repository secrets:
+
+- `LOCALPDF_SECRET_BOOTSTRAP_TOKEN` — a fine-grained personal access token scoped
+  only to this repository, with repository **Secrets: Read and write** permission
+- `LOCALPDF_SIGNING_BOOTSTRAP_PASSWORD` — a unique password of at least 16
+  characters that is stored in a password manager
+
+Run **Actions → Bootstrap Release Signing → Run workflow**, enter `CREATE`, and
+wait for it to finish. Download the `localpdf-release-keystore-BACK-UP-NOW`
+artifact immediately; it expires after one day. Store the keystore in two
+encrypted locations together with the signing password.
+
+After confirming the backup, delete both temporary bootstrap secrets, revoke the
+fine-grained token, and delete the bootstrap workflow run so its short-lived
+keystore artifact is removed. The workflow creates the four permanent secrets
+listed below. Never rerun it for an app that has already been distributed unless
+you intentionally want a new signing identity.
+
+### Manual setup
+
 In GitHub, open **Settings → Secrets and variables → Actions → New repository
 secret** and create:
 
