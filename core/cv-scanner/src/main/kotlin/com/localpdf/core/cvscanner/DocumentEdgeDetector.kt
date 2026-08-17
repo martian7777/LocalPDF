@@ -7,6 +7,7 @@ import org.opencv.core.CvType
 import org.opencv.core.Mat
 import org.opencv.core.MatOfPoint
 import org.opencv.core.MatOfPoint2f
+import org.opencv.core.MatOfDouble
 import org.opencv.core.Size
 import org.opencv.imgproc.Imgproc
 
@@ -50,7 +51,7 @@ class DocumentEdgeDetector {
             val mean = org.opencv.core.Core.mean(gray).`val`[0]
             val blurScore = try {
                 Imgproc.Laplacian(gray, laplacian, CvType.CV_64F)
-                val mu = Mat(); val sigma = Mat()
+                val mu = MatOfDouble(); val sigma = MatOfDouble()
                 try { org.opencv.core.Core.meanStdDev(laplacian, mu, sigma); sigma.get(0, 0)[0].let { it * it } } finally { mu.release(); sigma.release() }
             } finally { laplacian.release() }
             return ScanAnalysis(bounds, blurScore, mean < 55.0)

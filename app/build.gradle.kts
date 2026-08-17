@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":core:data"))
     implementation(project(":feature:library"))
     implementation(project(":feature:scanner"))
+    implementation(project(":feature:search"))
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)

@@ -4,6 +4,13 @@ import android.graphics.ImageDecoder
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import java.io.File
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.pdf.PdfDocument
+import com.localpdf.core.model.OcrBlock
 
 data class InspectedDocument(val pageCount: Int, val widthPx: Int, val heightPx: Int)
 
@@ -41,5 +48,44 @@ object DocumentInspector {
         }
         require(width > 0 && height > 0) { "Image is malformed" }
         return InspectedDocument(1, width, height)
+    }
+}
+
+object PdfEngine {
+    fun renderPages(source: File, mimeType: String, outputDirectory: File, maxWidth: Int = 2048): List<File> {
+        outputDirectory.mkdirs()
+        if (mimeType != "application/pdf") return listOf(source)
+        val descriptor = ParcelFileDescriptor.open(source, ParcelFileDescriptor.MODE_READ_ONLY)
+        try {
+            PdfRenderer(descriptor).use { renderer ->
+                return List(renderer.pageCount) { index ->
+                    renderer.openPage(index).use { page ->
+                        val scale = (maxWidth.toFloat() / page.width).coerceAtMost(1f)
+                        val bitmap = Bitmap.createBitmap((page.width * scale).toInt(), (page.height * scale).toInt(), Bitmap.Config.RGB_565)
+                        bitmap.eraseColor(Color.WHITE); page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                        File(outputDirectory, "page-${index + 1}.jpg").also { file -> file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 92, it) }; bitmap.recycle() }
+                    }
+                }
+            }
+        } finally { descriptor.close() }
+    }
+
+    fun createSearchablePdf(pages: List<Pair<File, List<OcrBlock>>>, output: File): File {
+        val pdf = PdfDocument()
+        try {
+            pages.forEachIndexed { index, (image, blocks) ->
+                val bitmap = requireNotNull(BitmapFactory.decodeFile(image.absolutePath))
+                val info = PdfDocument.PageInfo.Builder(bitmap.width, bitmap.height, index + 1).create()
+                val page = pdf.startPage(info)
+                page.canvas.drawBitmap(bitmap, 0f, 0f, null)
+                val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.BLACK; alpha = 1 }
+                blocks.forEach { block ->
+                    paint.textSize = ((block.boundingBox.bottom - block.boundingBox.top) * bitmap.height).coerceAtLeast(8f)
+                    page.canvas.drawText(block.text, block.boundingBox.left * bitmap.width, block.boundingBox.bottom * bitmap.height, paint)
+                }
+                pdf.finishPage(page); bitmap.recycle()
+            }
+            output.parentFile?.mkdirs(); output.outputStream().use(pdf::writeTo); return output
+        } finally { pdf.close() }
     }
 }

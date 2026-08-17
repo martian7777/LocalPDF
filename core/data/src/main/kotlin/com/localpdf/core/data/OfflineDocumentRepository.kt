@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import com.localpdf.core.work.DocumentProcessingWorker
 
 class OfflineDocumentRepository(
     private val context: Context,
@@ -77,6 +78,7 @@ class OfflineDocumentRepository(
                     List(inspected.pageCount) { index -> PageEntity("$id-$index", id, index, if (inspected.pageCount == 1 && type != "application/pdf") destination.absolutePath else null, inspected.widthPx, inspected.heightPx) },
                     emptyList(),
                 )
+                DocumentProcessingWorker.enqueue(context, id)
                 document
             } catch (error: Throwable) {
                 destination.delete()
@@ -109,6 +111,7 @@ class OfflineDocumentRepository(
                     PageEntity("$id-$index", id, index, file.absolutePath, inspected.widthPx, inspected.heightPx)
                 }
                 dao.insertComplete(document.toEntity(hash, ProcessingState.READY), pages, emptyList())
+                DocumentProcessingWorker.enqueue(context, id)
                 document
             } catch (error: Throwable) { directory.deleteRecursively(); throw error }
         }

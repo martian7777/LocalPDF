@@ -54,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -72,14 +73,16 @@ import androidx.compose.ui.unit.dp
 import com.localpdf.core.designsystem.GlassSurface
 import com.localpdf.core.designsystem.LocalPdfTheme
 import com.localpdf.core.data.OfflineDocumentRepository
+import com.localpdf.core.data.OfflineSearchRepository
 import com.localpdf.feature.library.LibraryAction
 import com.localpdf.feature.library.LibraryEffect
 import com.localpdf.feature.library.LibraryScreen
 import com.localpdf.feature.library.LibraryViewModel
 import com.localpdf.feature.scanner.ScannerScreen
+import com.localpdf.feature.search.SearchScreen
+import com.localpdf.feature.search.SearchViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.lifecycleScope
 import android.widget.Toast
 import kotlinx.coroutines.launch
 
@@ -100,6 +103,7 @@ class MainActivity : ComponentActivity() {
         cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val documentRepository = OfflineDocumentRepository.create(applicationContext)
         val libraryFactory = LibraryViewModel.Factory(documentRepository)
+        val searchFactory = SearchViewModel.Factory(OfflineSearchRepository.create(applicationContext))
         setContent {
             LocalPdfTheme {
                 LocalPdfApp(
@@ -116,6 +120,7 @@ class MainActivity : ComponentActivity() {
                     },
                     libraryFactory = libraryFactory,
                     documentRepository = documentRepository,
+                    searchFactory = searchFactory,
                 )
             }
         }
@@ -142,6 +147,7 @@ private fun LocalPdfApp(
     onOpenSettings: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
     documentRepository: OfflineDocumentRepository,
+    searchFactory: SearchViewModel.Factory,
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     val layoutMode = when {
@@ -151,6 +157,7 @@ private fun LocalPdfApp(
     }
     var destination by remember { mutableStateOf(AppDestination.Library) }
     var scannerOpen by remember { mutableStateOf(false) }
+    val appScope = rememberCoroutineScope()
 
     val background = Brush.radialGradient(
         listOf(
@@ -167,7 +174,7 @@ private fun LocalPdfApp(
                 ScannerScreen(
                     onClose = { scannerOpen = false },
                     onFinished = { pages ->
-                        lifecycleScope.launch {
+                        appScope.launch {
                             documentRepository.importCapturedPages(pages)
                             scannerOpen = false
                         }
@@ -180,6 +187,7 @@ private fun LocalPdfApp(
                 onDestination = { destination = it },
                 onScan = { scannerOpen = true },
                 libraryFactory = libraryFactory,
+                searchFactory = searchFactory,
             )
         } else {
             WideShell(
@@ -188,6 +196,7 @@ private fun LocalPdfApp(
                 onDestination = { destination = it },
                 onScan = { scannerOpen = true },
                 libraryFactory = libraryFactory,
+                searchFactory = searchFactory,
             )
         }
     }
@@ -199,6 +208,7 @@ private fun CompactShell(
     onDestination: (AppDestination) -> Unit,
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
+    searchFactory: SearchViewModel.Factory,
 ) {
     Scaffold(
         containerColor = Color.Transparent,
@@ -223,7 +233,7 @@ private fun CompactShell(
             }
         },
     ) { padding ->
-        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory)
+        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory)
     }
 }
 
@@ -234,6 +244,7 @@ private fun WideShell(
     onDestination: (AppDestination) -> Unit,
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
+    searchFactory: SearchViewModel.Factory,
 ) {
     Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
         NavigationRail(
@@ -256,7 +267,7 @@ private fun WideShell(
             }
             Spacer(Modifier.weight(1f))
         }
-        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory)
+        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory)
     }
 }
 
@@ -267,6 +278,7 @@ private fun DestinationContent(
     expanded: Boolean,
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
+    searchFactory: SearchViewModel.Factory,
 ) {
     Column(
         modifier = modifier.padding(horizontal = if (expanded) 40.dp else 20.dp, vertical = 24.dp),
@@ -275,11 +287,19 @@ private fun DestinationContent(
         Text(destination.label, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         when (destination) {
             AppDestination.Library -> LibraryRoute(expanded, libraryFactory)
-            AppDestination.Search -> EmptyFeatureCard(Icons.Filled.Search, "Search every page", "Your on-device full-text index will appear here after the first document is processed.")
+            AppDestination.Search -> SearchRoute(searchFactory)
             AppDestination.Vault -> EmptyFeatureCard(Icons.Filled.Info, "Private Vault", "Biometric-protected documents stay encrypted and available only on this device.")
             AppDestination.Settings -> PrivacyDashboard()
         }
     }
+}
+
+@Composable
+private fun SearchRoute(factory: SearchViewModel.Factory) {
+    val searchViewModel: SearchViewModel = viewModel(factory = factory)
+    val state by searchViewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    SearchScreen(state, searchViewModel::onAction, onOpen = { Toast.makeText(context, "Viewer opening is next in this slice", Toast.LENGTH_SHORT).show() })
 }
 
 @Composable
