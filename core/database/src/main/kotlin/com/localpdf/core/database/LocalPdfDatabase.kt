@@ -120,11 +120,17 @@ interface DocumentDao {
     @Query("SELECT * FROM documents WHERE is_vaulted = 0 ORDER BY updated_at DESC")
     fun observeLibrary(): Flow<List<DocumentEntity>>
 
+    @Query("SELECT * FROM documents WHERE is_vaulted = 1 ORDER BY updated_at DESC")
+    fun observeVault(): Flow<List<DocumentEntity>>
+
     @Query("SELECT * FROM tags")
     fun observeTags(): Flow<List<TagEntity>>
 
     @Query("SELECT * FROM documents WHERE id = :id")
     suspend fun getById(id: String): DocumentEntity?
+
+    @Query("SELECT * FROM documents WHERE id = :id")
+    fun observeById(id: String): Flow<DocumentEntity?>
 
     @Query("SELECT id FROM documents WHERE content_hash = :hash LIMIT 1")
     suspend fun findIdByHash(hash: String): String?
@@ -150,6 +156,18 @@ interface DocumentDao {
     @Query("SELECT * FROM pages WHERE document_id = :documentId ORDER BY page_index")
     suspend fun getPages(documentId: String): List<PageEntity>
 
+    @Query("SELECT * FROM pages WHERE document_id = :documentId ORDER BY page_index")
+    fun observePages(documentId: String): Flow<List<PageEntity>>
+
+    @Query("SELECT * FROM ocr_blocks WHERE page_id IN (SELECT id FROM pages WHERE document_id = :documentId) ORDER BY page_id, top, left")
+    fun observeOcrBlocks(documentId: String): Flow<List<OcrBlockEntity>>
+
+    @Query("UPDATE ocr_blocks SET text = :text WHERE id = :blockId")
+    suspend fun updateOcrText(blockId: String, text: String): Int
+
+    @Query("SELECT * FROM ocr_blocks WHERE page_id IN (SELECT id FROM pages WHERE document_id = :documentId) ORDER BY page_id, top, left")
+    suspend fun getOcrBlocks(documentId: String): List<OcrBlockEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOcrBlocks(blocks: List<OcrBlockEntity>)
 
@@ -170,6 +188,9 @@ interface DocumentDao {
 
     @Query("UPDATE documents SET file_path = :path, file_size = :size, processing_state = :state, updated_at = :updatedAt WHERE id = :documentId")
     suspend fun updateOutput(documentId: String, path: String, size: Long, state: String, updatedAt: Long)
+
+    @Query("UPDATE documents SET file_path = :path, file_size = :size, is_vaulted = :vaulted, updated_at = :updatedAt WHERE id = :documentId")
+    suspend fun updateVault(documentId: String, path: String, size: Long, vaulted: Boolean, updatedAt: Long)
 
     @Query("SELECT d.id, d.title, d.file_path, d.file_size, d.page_count, d.mime_type, d.classification, d.is_vaulted, d.is_favorite, d.created_at, d.updated_at, snippet(document_fts, 2, '[', ']', '…', 18) AS snippet FROM document_fts JOIN documents d ON d.id = document_fts.document_id WHERE document_fts MATCH :query AND d.is_vaulted = 0 ORDER BY d.updated_at DESC LIMIT 100")
     fun search(query: String): Flow<List<SearchRow>>

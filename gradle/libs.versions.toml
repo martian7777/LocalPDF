@@ -15,6 +15,7 @@ camera = "1.5.3"
 opencv = "4.13.0"
 onnx = "1.21.1"
 work = "2.11.1"
+biometric = "1.1.0"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -43,6 +44,7 @@ androidx-camera-view = { module = "androidx.camera:camera-view", version.ref = "
 opencv = { module = "org.opencv:opencv", version.ref = "opencv" }
 onnxruntime-android = { module = "com.microsoft.onnxruntime:onnxruntime-android", version.ref = "onnx" }
 androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 junit = { module = "junit:junit", version.ref = "junit" }
 
 [plugins]

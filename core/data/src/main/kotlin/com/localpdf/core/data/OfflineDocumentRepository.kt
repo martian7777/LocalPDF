@@ -9,6 +9,9 @@ import com.localpdf.core.database.PageEntity
 import com.localpdf.core.database.TagEntity
 import com.localpdf.core.database.LocalPdfDatabase
 import com.localpdf.core.model.Document
+import com.localpdf.core.model.DocumentPage
+import com.localpdf.core.model.OcrBlock
+import com.localpdf.core.model.BoundingBox
 import com.localpdf.core.model.DocumentClassification
 import com.localpdf.core.model.ProcessingState
 import com.localpdf.core.pdf.DocumentInspector
@@ -30,6 +33,18 @@ class OfflineDocumentRepository(
     override fun observeDocuments(): Flow<List<Document>> = combine(dao.observeLibrary(), dao.observeTags()) { docs, tags ->
         val tagsByDocument = tags.groupBy(TagEntity::documentId).mapValues { it.value.map(TagEntity::tag) }
         docs.map { it.toModel(tagsByDocument[it.id].orEmpty()) }
+    }
+
+    override fun observeDocument(id: String): Flow<Document?> = combine(dao.observeById(id), dao.observeTags()) { entity, tags ->
+        entity?.toModel(tags.filter { it.documentId == id }.map(TagEntity::tag))
+    }
+
+    override fun observePages(documentId: String): Flow<List<DocumentPage>> = combine(dao.observePages(documentId), dao.observeOcrBlocks(documentId)) { pages, blocks ->
+        val byPage = blocks.groupBy { it.pageId }
+        pages.map { page ->
+            DocumentPage(page.id, page.documentId, page.pageIndex, page.imagePath, page.widthPx, page.heightPx,
+                byPage[page.id].orEmpty().map { block -> OcrBlock(block.id, block.pageId, block.text, block.confidence, BoundingBox(block.left, block.top, block.right, block.bottom), block.language) })
+        }
     }
 
     override suspend fun importDocument(sourceUri: String): Result<Document> = runCatching {
@@ -117,6 +132,11 @@ class OfflineDocumentRepository(
         }
     }
     override suspend fun rename(id: String, title: String) = runCatching { require(title.isNotBlank()); dao.rename(id, title.trim(), System.currentTimeMillis()) }
+    override suspend fun correctOcr(documentId: String, blockId: String, text: String) = runCatching {
+        require(text.isNotBlank()) { "OCR text cannot be empty" }
+        check(dao.updateOcrText(blockId, text.trim()) == 1) { "OCR block no longer exists" }
+        DocumentProcessingWorker.enqueueCorrection(context, documentId)
+    }
     override suspend fun delete(id: String) = runCatching {
         withContext(Dispatchers.IO) {
             val document = requireNotNull(dao.getById(id))

@@ -31,7 +31,11 @@ class DocumentProcessingWorker(context: Context, parameters: WorkerParameters) :
             val imageFiles = if (document.mimeType == "application/pdf") PdfEngine.renderPages(source, document.mimeType, File(directory, "rendered")) else dao.getPages(id).mapNotNull { it.imagePath?.let(::File) }
             require(imageFiles.isNotEmpty()) { "No readable pages" }
             val pages = dao.getPages(id)
-            val allBlocks = OnDeviceOcrEngine(applicationContext).use { engine ->
+            val correctionOnly = inputData.getBoolean(KEY_CORRECTION_ONLY, false)
+            val allBlocks = if (correctionOnly) {
+                val stored = dao.getOcrBlocks(id).groupBy { it.pageId }
+                pages.map { page -> stored[page.id].orEmpty().map { it.toModel() } }
+            } else OnDeviceOcrEngine(applicationContext).use { engine ->
                 imageFiles.mapIndexed { index, image ->
                     val page = pages[index]
                     val dimensions = BitmapFactory.Options().also { it.inJustDecodeBounds = true; BitmapFactory.decodeFile(image.absolutePath, it) }
@@ -59,9 +63,20 @@ class DocumentProcessingWorker(context: Context, parameters: WorkerParameters) :
 
     companion object {
         const val KEY_ID = "document_id"
+        private const val KEY_CORRECTION_ONLY = "correction_only"
         fun enqueue(context: Context, documentId: String) {
             val request = OneTimeWorkRequestBuilder<DocumentProcessingWorker>().setInputData(Data.Builder().putString(KEY_ID, documentId).build()).addTag("document_process_$documentId").build()
             WorkManager.getInstance(context).enqueueUniqueWork("document_process_$documentId", ExistingWorkPolicy.KEEP, request)
         }
+        fun enqueueCorrection(context: Context, documentId: String) {
+            val input = Data.Builder().putString(KEY_ID, documentId).putBoolean(KEY_CORRECTION_ONLY, true).build()
+            val request = OneTimeWorkRequestBuilder<DocumentProcessingWorker>().setInputData(input).addTag("document_process_$documentId").build()
+            WorkManager.getInstance(context).enqueueUniqueWork("document_process_$documentId", ExistingWorkPolicy.REPLACE, request)
+        }
     }
 }
+
+private fun OcrBlockEntity.toModel() = com.localpdf.core.model.OcrBlock(
+    id, pageId, text, confidence,
+    com.localpdf.core.model.BoundingBox(left, top, right, bottom), language,
+)

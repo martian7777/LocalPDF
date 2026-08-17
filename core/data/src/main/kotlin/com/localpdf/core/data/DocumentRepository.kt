@@ -1,14 +1,18 @@
 package com.localpdf.core.data
 
 import com.localpdf.core.model.Document
+import com.localpdf.core.model.DocumentPage
 import kotlinx.coroutines.flow.Flow
 
 interface DocumentRepository {
     fun observeDocuments(): Flow<List<Document>>
+    fun observeDocument(id: String): Flow<Document?>
+    fun observePages(documentId: String): Flow<List<DocumentPage>>
     suspend fun importDocument(sourceUri: String): Result<Document>
     suspend fun importCapturedPages(pagePaths: List<String>): Result<Document>
     suspend fun setFavorite(id: String, favorite: Boolean): Result<Unit>
     suspend fun rename(id: String, title: String): Result<Unit>
+    suspend fun correctOcr(documentId: String, blockId: String, text: String): Result<Unit>
     suspend fun delete(id: String): Result<Unit>
 }
 

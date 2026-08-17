@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -74,6 +74,7 @@ import com.localpdf.core.designsystem.GlassSurface
 import com.localpdf.core.designsystem.LocalPdfTheme
 import com.localpdf.core.data.OfflineDocumentRepository
 import com.localpdf.core.data.OfflineSearchRepository
+import com.localpdf.core.data.OfflineRedactionRepository
 import com.localpdf.feature.library.LibraryAction
 import com.localpdf.feature.library.LibraryEffect
 import com.localpdf.feature.library.LibraryScreen
@@ -81,14 +82,22 @@ import com.localpdf.feature.library.LibraryViewModel
 import com.localpdf.feature.scanner.ScannerScreen
 import com.localpdf.feature.search.SearchScreen
 import com.localpdf.feature.search.SearchViewModel
+import com.localpdf.feature.viewer.DocumentViewerScreen
+import com.localpdf.feature.viewer.ViewerViewModel
+import com.localpdf.core.security.KeystoreVaultRepository
+import com.localpdf.core.security.VaultRepository
+import com.localpdf.feature.vault.VaultAuthenticator
+import com.localpdf.feature.vault.VaultScreen
+import com.localpdf.feature.vault.VaultViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.widget.Toast
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     private var cameraGranted by mutableStateOf(false)
     private var cameraRequested by mutableStateOf(false)
+    private lateinit var vaultRepository: VaultRepository
 
     private val cameraPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
@@ -102,8 +111,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
         val documentRepository = OfflineDocumentRepository.create(applicationContext)
+        vaultRepository = KeystoreVaultRepository.create(applicationContext)
         val libraryFactory = LibraryViewModel.Factory(documentRepository)
         val searchFactory = SearchViewModel.Factory(OfflineSearchRepository.create(applicationContext))
+        val redactionRepository = OfflineRedactionRepository.create(applicationContext)
+        val vaultFactory = VaultViewModel.Factory(vaultRepository)
         setContent {
             LocalPdfTheme {
                 LocalPdfApp(
@@ -121,10 +133,15 @@ class MainActivity : ComponentActivity() {
                     libraryFactory = libraryFactory,
                     documentRepository = documentRepository,
                     searchFactory = searchFactory,
+                    vaultFactory = vaultFactory,
+                    vaultRepository = vaultRepository,
+                    redactionRepository = redactionRepository,
                 )
             }
         }
     }
+
+    override fun onStop() { super.onStop(); if (::vaultRepository.isInitialized) vaultRepository.clearTemporaryFiles() }
 }
 
 private enum class AppDestination(
@@ -148,6 +165,9 @@ private fun LocalPdfApp(
     libraryFactory: LibraryViewModel.Factory,
     documentRepository: OfflineDocumentRepository,
     searchFactory: SearchViewModel.Factory,
+    vaultFactory: VaultViewModel.Factory,
+    vaultRepository: VaultRepository,
+    redactionRepository: com.localpdf.core.data.RedactionRepository,
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     val layoutMode = when {
@@ -157,6 +177,7 @@ private fun LocalPdfApp(
     }
     var destination by remember { mutableStateOf(AppDestination.Library) }
     var scannerOpen by remember { mutableStateOf(false) }
+    var openDocumentId by remember { mutableStateOf<String?>(null) }
     val appScope = rememberCoroutineScope()
 
     val background = Brush.radialGradient(
@@ -169,7 +190,12 @@ private fun LocalPdfApp(
     )
 
     Box(Modifier.fillMaxSize().background(background)) {
-        if (scannerOpen) {
+        if (openDocumentId != null) {
+            val viewer: ViewerViewModel = viewModel(key = openDocumentId, factory = ViewerViewModel.Factory(openDocumentId!!, documentRepository))
+            val viewerState by viewer.state.collectAsStateWithLifecycle()
+            val activity = LocalContext.current as FragmentActivity
+            DocumentViewerScreen(viewerState, viewer::onAction, onBack = { openDocumentId = null }, onMoveToVault = { id -> VaultAuthenticator.authenticate(activity, "Protect document", onSuccess = { appScope.launch { vaultRepository.moveToVault(id).onSuccess { openDocumentId = null; destination = AppDestination.Vault }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, onError = { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) }, onCreateRedactedCopy = { id, regions -> appScope.launch { redactionRepository.createPermanentCopy(id, regions).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Verified flattened copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, modifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing).padding(20.dp))
+        } else if (scannerOpen) {
             if (cameraGranted) {
                 ScannerScreen(
                     onClose = { scannerOpen = false },
@@ -188,6 +214,8 @@ private fun LocalPdfApp(
                 onScan = { scannerOpen = true },
                 libraryFactory = libraryFactory,
                 searchFactory = searchFactory,
+                onOpenDocument = { openDocumentId = it },
+                vaultFactory = vaultFactory,
             )
         } else {
             WideShell(
@@ -197,6 +225,8 @@ private fun LocalPdfApp(
                 onScan = { scannerOpen = true },
                 libraryFactory = libraryFactory,
                 searchFactory = searchFactory,
+                onOpenDocument = { openDocumentId = it },
+                vaultFactory = vaultFactory,
             )
         }
     }
@@ -209,6 +239,8 @@ private fun CompactShell(
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
     searchFactory: SearchViewModel.Factory,
+    onOpenDocument: (String) -> Unit,
+    vaultFactory: VaultViewModel.Factory,
 ) {
     Scaffold(
         containerColor = Color.Transparent,
@@ -233,7 +265,7 @@ private fun CompactShell(
             }
         },
     ) { padding ->
-        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory)
+        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory, onOpenDocument = onOpenDocument, vaultFactory = vaultFactory)
     }
 }
 
@@ -245,6 +277,8 @@ private fun WideShell(
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
     searchFactory: SearchViewModel.Factory,
+    onOpenDocument: (String) -> Unit,
+    vaultFactory: VaultViewModel.Factory,
 ) {
     Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
         NavigationRail(
@@ -267,7 +301,7 @@ private fun WideShell(
             }
             Spacer(Modifier.weight(1f))
         }
-        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory)
+        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory, onOpenDocument = onOpenDocument, vaultFactory = vaultFactory)
     }
 }
 
@@ -279,6 +313,8 @@ private fun DestinationContent(
     onScan: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
     searchFactory: SearchViewModel.Factory,
+    onOpenDocument: (String) -> Unit,
+    vaultFactory: VaultViewModel.Factory,
 ) {
     Column(
         modifier = modifier.padding(horizontal = if (expanded) 40.dp else 20.dp, vertical = 24.dp),
@@ -286,24 +322,29 @@ private fun DestinationContent(
     ) {
         Text(destination.label, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         when (destination) {
-            AppDestination.Library -> LibraryRoute(expanded, libraryFactory)
-            AppDestination.Search -> SearchRoute(searchFactory)
-            AppDestination.Vault -> EmptyFeatureCard(Icons.Filled.Info, "Private Vault", "Biometric-protected documents stay encrypted and available only on this device.")
+            AppDestination.Library -> LibraryRoute(expanded, libraryFactory, onOpenDocument)
+            AppDestination.Search -> SearchRoute(searchFactory, onOpenDocument)
+            AppDestination.Vault -> VaultRoute(vaultFactory)
             AppDestination.Settings -> PrivacyDashboard()
         }
     }
 }
 
-@Composable
-private fun SearchRoute(factory: SearchViewModel.Factory) {
-    val searchViewModel: SearchViewModel = viewModel(factory = factory)
-    val state by searchViewModel.state.collectAsStateWithLifecycle()
-    val context = LocalContext.current
-    SearchScreen(state, searchViewModel::onAction, onOpen = { Toast.makeText(context, "Viewer opening is next in this slice", Toast.LENGTH_SHORT).show() })
+@Composable private fun VaultRoute(factory: VaultViewModel.Factory) {
+    val vm: VaultViewModel = viewModel(factory = factory); val documents by vm.documents.collectAsStateWithLifecycle(); val activity = LocalContext.current as FragmentActivity
+    fun auth(title: String, action: () -> Unit) = VaultAuthenticator.authenticate(activity, title, action) { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }
+    VaultScreen(documents, onUnlock = { doc -> auth("Unlock ${doc.title}") { vm.open(doc.id, { Toast.makeText(activity, "Unlocked temporary copy created", Toast.LENGTH_SHORT).show() }, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } }, onRestore = { doc -> auth("Restore ${doc.title}") { vm.restore(doc.id, {}, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } })
 }
 
 @Composable
-private fun LibraryRoute(expanded: Boolean, factory: LibraryViewModel.Factory) {
+private fun SearchRoute(factory: SearchViewModel.Factory, onOpenDocument: (String) -> Unit) {
+    val searchViewModel: SearchViewModel = viewModel(factory = factory)
+    val state by searchViewModel.state.collectAsStateWithLifecycle()
+    SearchScreen(state, searchViewModel::onAction, onOpen = onOpenDocument)
+}
+
+@Composable
+private fun LibraryRoute(expanded: Boolean, factory: LibraryViewModel.Factory, onOpenDocument: (String) -> Unit) {
     val viewModel: LibraryViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -315,7 +356,7 @@ private fun LibraryRoute(expanded: Boolean, factory: LibraryViewModel.Factory) {
             when (effect) {
                 LibraryEffect.LaunchImportPicker -> importer.launch(arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))
                 is LibraryEffect.Message -> Toast.makeText(context, effect.text, Toast.LENGTH_LONG).show()
-                is LibraryEffect.OpenDocument -> Toast.makeText(context, "Viewer is implemented in the OCR/PDF slice", Toast.LENGTH_SHORT).show()
+                is LibraryEffect.OpenDocument -> onOpenDocument(effect.id)
             }
         }
     }

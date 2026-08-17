@@ -11,6 +11,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
 import com.localpdf.core.model.OcrBlock
+import com.localpdf.core.model.RedactionRegion
 
 data class InspectedDocument(val pageCount: Int, val widthPx: Int, val heightPx: Int)
 
@@ -88,4 +89,22 @@ object PdfEngine {
             output.parentFile?.mkdirs(); output.outputStream().use(pdf::writeTo); return output
         } finally { pdf.close() }
     }
+
+    fun createRedactedPdf(pages: List<Pair<File, List<OcrBlock>>>, regions: List<RedactionRegion>, output: File, rasterDirectory: File): Pair<File, List<Pair<File, List<OcrBlock>>>> {
+        require(regions.isNotEmpty()) { "Select at least one redaction region" }
+        rasterDirectory.mkdirs()
+        val sanitized = pages.mapIndexed { index, (image, blocks) ->
+            val bitmap = requireNotNull(BitmapFactory.decodeFile(image.absolutePath)).copy(Bitmap.Config.ARGB_8888, true)
+            val canvas = Canvas(bitmap); val paint = Paint().apply { color = Color.BLACK; style = Paint.Style.FILL }
+            val pageRegions = regions.filter { it.pageIndex == index }
+            pageRegions.forEach { region -> canvas.drawRect(region.bounds.left * bitmap.width, region.bounds.top * bitmap.height, region.bounds.right * bitmap.width, region.bounds.bottom * bitmap.height, paint) }
+            val safeBlocks = blocks.filterNot { block -> pageRegions.any { overlaps(block.boundingBox, it.bounds) } }
+            val raster = File(rasterDirectory, "page-${index + 1}.jpg")
+            raster.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 96, it) }; bitmap.recycle()
+            raster to safeBlocks
+        }
+        return createSearchablePdf(sanitized, output) to sanitized
+    }
+
+    private fun overlaps(a: com.localpdf.core.model.BoundingBox, b: com.localpdf.core.model.BoundingBox): Boolean = a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top
 }
