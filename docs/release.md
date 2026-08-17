@@ -38,3 +38,25 @@ Run `gradlew :app:collectReleaseArtifacts`. Outputs are copied to
 Back up the keystore in two encrypted, user-controlled locations. Losing it can
 prevent future direct-install upgrades. Never commit it, its passwords, or a
 password-bearing command transcript.
+
+## GitHub Actions secrets
+
+In GitHub, open **Settings → Secrets and variables → Actions → New repository
+secret** and create:
+
+- `LOCALPDF_KEYSTORE_BASE64` — the complete keystore encoded as one Base64 value
+- `LOCALPDF_KEYSTORE_PASSWORD`
+- `LOCALPDF_KEY_PASSWORD`
+- `LOCALPDF_KEY_ALIAS` — optional; defaults to `localpdf-release`
+
+PowerShell can prepare the Base64 value without modifying the keystore:
+
+```powershell
+[Convert]::ToBase64String([IO.File]::ReadAllBytes('C:\secure\localpdf-release.jks')) |
+  Set-Clipboard
+```
+
+Run **Actions → Build & Publish Artifacts → Run workflow**, choose `all`, and
+open the completed run. The job summary links to the run's **Artifacts** section;
+the artifact ZIP contains the APK/AAB and `SHA256SUMS.txt`. A pushed `v*` tag also
+attaches the same files to GitHub Releases.
