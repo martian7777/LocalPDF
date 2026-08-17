@@ -7,6 +7,7 @@ import com.localpdf.core.database.DocumentDao
 import com.localpdf.core.database.DocumentEntity
 import com.localpdf.core.database.PageEntity
 import com.localpdf.core.database.TagEntity
+import com.localpdf.core.database.LocalPdfDatabase
 import com.localpdf.core.model.Document
 import com.localpdf.core.model.DocumentClassification
 import com.localpdf.core.model.ProcessingState
@@ -86,17 +87,44 @@ class OfflineDocumentRepository(
     }
 
     override suspend fun setFavorite(id: String, favorite: Boolean) = runCatching { dao.setFavorite(id, favorite, System.currentTimeMillis()) }
+
+    override suspend fun importCapturedPages(pagePaths: List<String>): Result<Document> = runCatching {
+        withContext(Dispatchers.IO) {
+            require(pagePaths.isNotEmpty()) { "Capture at least one page" }
+            val id = UUID.randomUUID().toString()
+            val directory = File(context.filesDir, "documents/$id").apply { check(mkdirs()) }
+            try {
+                val copied = pagePaths.mapIndexed { index, path ->
+                    val source = File(path); require(source.isFile && source.length() > 0) { "A captured page is missing" }
+                    File(directory, "page-${index + 1}.jpg").also { target -> source.copyTo(target); source.delete() }
+                }
+                val hashDigest = MessageDigest.getInstance("SHA-256")
+                copied.forEach { file -> file.inputStream().use { input -> input.copyTo(object : java.io.OutputStream() { override fun write(b: Int) { hashDigest.update(b.toByte()) }; override fun write(b: ByteArray, off: Int, len: Int) { hashDigest.update(b, off, len) } }) } }
+                val hash = hashDigest.digest().joinToString("") { "%02x".format(it) }
+                if (dao.findIdByHash(hash) != null) throw DuplicateDocumentException()
+                val now = Instant.now()
+                val document = Document(id, "Scan ${java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm").withZone(java.time.ZoneId.systemDefault()).format(now)}", directory.absolutePath, copied.sumOf(File::length), copied.size, "application/x-localpdf-scan", createdAt = now, updatedAt = now)
+                val pages = copied.mapIndexed { index, file ->
+                    val inspected = DocumentInspector.inspect(file, "image/jpeg")
+                    PageEntity("$id-$index", id, index, file.absolutePath, inspected.widthPx, inspected.heightPx)
+                }
+                dao.insertComplete(document.toEntity(hash, ProcessingState.READY), pages, emptyList())
+                document
+            } catch (error: Throwable) { directory.deleteRecursively(); throw error }
+        }
+    }
     override suspend fun rename(id: String, title: String) = runCatching { require(title.isNotBlank()); dao.rename(id, title.trim(), System.currentTimeMillis()) }
     override suspend fun delete(id: String) = runCatching {
         withContext(Dispatchers.IO) {
             val document = requireNotNull(dao.getById(id))
             check(dao.delete(id) == 1)
             File(document.filePath).parentFile?.deleteRecursively()
+            Unit
         }
     }
 
     private fun sniffMime(uri: Uri): String {
-        val bytes = context.contentResolver.openInputStream(uri).use { it?.readNBytes(12) }.orEmpty()
+        val bytes: ByteArray = context.contentResolver.openInputStream(uri).use { it?.readNBytes(12) } ?: byteArrayOf()
         return when {
             bytes.take(4).toByteArray().contentEquals("%PDF".toByteArray()) -> "application/pdf"
             bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() -> "image/jpeg"
@@ -112,5 +140,9 @@ class OfflineDocumentRepository(
     companion object {
         private const val MAX_IMPORT_BYTES = 250L * 1024 * 1024
         private val SUPPORTED_TYPES = setOf("application/pdf", "image/jpeg", "image/png", "image/webp")
+        fun create(context: Context): OfflineDocumentRepository {
+            val appContext = context.applicationContext
+            return OfflineDocumentRepository(appContext, LocalPdfDatabase.create(appContext).documentDao())
+        }
     }
 }

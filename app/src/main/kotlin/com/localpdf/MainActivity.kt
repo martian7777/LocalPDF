@@ -72,14 +72,16 @@ import androidx.compose.ui.unit.dp
 import com.localpdf.core.designsystem.GlassSurface
 import com.localpdf.core.designsystem.LocalPdfTheme
 import com.localpdf.core.data.OfflineDocumentRepository
-import com.localpdf.core.database.LocalPdfDatabase
 import com.localpdf.feature.library.LibraryAction
 import com.localpdf.feature.library.LibraryEffect
 import com.localpdf.feature.library.LibraryScreen
 import com.localpdf.feature.library.LibraryViewModel
+import com.localpdf.feature.scanner.ScannerScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.lifecycleScope
 import android.widget.Toast
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var cameraGranted by mutableStateOf(false)
@@ -96,8 +98,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        val database = LocalPdfDatabase.create(applicationContext)
-        val libraryFactory = LibraryViewModel.Factory(OfflineDocumentRepository(applicationContext, database.documentDao()))
+        val documentRepository = OfflineDocumentRepository.create(applicationContext)
+        val libraryFactory = LibraryViewModel.Factory(documentRepository)
         setContent {
             LocalPdfTheme {
                 LocalPdfApp(
@@ -113,6 +115,7 @@ class MainActivity : ComponentActivity() {
                         )
                     },
                     libraryFactory = libraryFactory,
+                    documentRepository = documentRepository,
                 )
             }
         }
@@ -138,6 +141,7 @@ private fun LocalPdfApp(
     onRequestCamera: () -> Unit,
     onOpenSettings: () -> Unit,
     libraryFactory: LibraryViewModel.Factory,
+    documentRepository: OfflineDocumentRepository,
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     val layoutMode = when {
@@ -159,13 +163,17 @@ private fun LocalPdfApp(
 
     Box(Modifier.fillMaxSize().background(background)) {
         if (scannerOpen) {
-            ScannerPlaceholder(
-                cameraGranted = cameraGranted,
-                cameraRequested = cameraRequested,
-                onRequestCamera = onRequestCamera,
-                onOpenSettings = onOpenSettings,
-                onClose = { scannerOpen = false },
-            )
+            if (cameraGranted) {
+                ScannerScreen(
+                    onClose = { scannerOpen = false },
+                    onFinished = { pages ->
+                        lifecycleScope.launch {
+                            documentRepository.importCapturedPages(pages)
+                            scannerOpen = false
+                        }
+                    },
+                )
+            } else ScannerPlaceholder(cameraGranted, cameraRequested, onRequestCamera, onOpenSettings) { scannerOpen = false }
         } else if (layoutMode == LayoutMode.Compact) {
             CompactShell(
                 destination = destination,

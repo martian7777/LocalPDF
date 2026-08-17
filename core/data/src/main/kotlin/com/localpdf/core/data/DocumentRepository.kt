@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface DocumentRepository {
     fun observeDocuments(): Flow<List<Document>>
     suspend fun importDocument(sourceUri: String): Result<Document>
+    suspend fun importCapturedPages(pagePaths: List<String>): Result<Document>
     suspend fun setFavorite(id: String, favorite: Boolean): Result<Unit>
     suspend fun rename(id: String, title: String): Result<Unit>
     suspend fun delete(id: String): Result<Unit>
