@@ -19,4 +19,7 @@ rootProject.name = "LocalPDF"
 include(":app")
 include(":core:model")
 include(":core:designsystem")
-
+include(":core:database")
+include(":core:data")
+include(":core:pdf")
+include(":feature:library")

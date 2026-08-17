@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,6 +63,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -68,6 +71,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.localpdf.core.designsystem.GlassSurface
 import com.localpdf.core.designsystem.LocalPdfTheme
+import com.localpdf.core.data.OfflineDocumentRepository
+import com.localpdf.core.database.LocalPdfDatabase
+import com.localpdf.feature.library.LibraryAction
+import com.localpdf.feature.library.LibraryEffect
+import com.localpdf.feature.library.LibraryScreen
+import com.localpdf.feature.library.LibraryViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import android.widget.Toast
 
 class MainActivity : ComponentActivity() {
     private var cameraGranted by mutableStateOf(false)
@@ -84,6 +96,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        val database = LocalPdfDatabase.create(applicationContext)
+        val libraryFactory = LibraryViewModel.Factory(OfflineDocumentRepository(applicationContext, database.documentDao()))
         setContent {
             LocalPdfTheme {
                 LocalPdfApp(
@@ -98,6 +112,7 @@ class MainActivity : ComponentActivity() {
                             ),
                         )
                     },
+                    libraryFactory = libraryFactory,
                 )
             }
         }
@@ -122,6 +137,7 @@ private fun LocalPdfApp(
     cameraRequested: Boolean,
     onRequestCamera: () -> Unit,
     onOpenSettings: () -> Unit,
+    libraryFactory: LibraryViewModel.Factory,
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     val layoutMode = when {
@@ -155,6 +171,7 @@ private fun LocalPdfApp(
                 destination = destination,
                 onDestination = { destination = it },
                 onScan = { scannerOpen = true },
+                libraryFactory = libraryFactory,
             )
         } else {
             WideShell(
@@ -162,6 +179,7 @@ private fun LocalPdfApp(
                 destination = destination,
                 onDestination = { destination = it },
                 onScan = { scannerOpen = true },
+                libraryFactory = libraryFactory,
             )
         }
     }
@@ -172,6 +190,7 @@ private fun CompactShell(
     destination: AppDestination,
     onDestination: (AppDestination) -> Unit,
     onScan: () -> Unit,
+    libraryFactory: LibraryViewModel.Factory,
 ) {
     Scaffold(
         containerColor = Color.Transparent,
@@ -196,7 +215,7 @@ private fun CompactShell(
             }
         },
     ) { padding ->
-        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan)
+        DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory)
     }
 }
 
@@ -206,6 +225,7 @@ private fun WideShell(
     destination: AppDestination,
     onDestination: (AppDestination) -> Unit,
     onScan: () -> Unit,
+    libraryFactory: LibraryViewModel.Factory,
 ) {
     Row(Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)) {
         NavigationRail(
@@ -228,7 +248,7 @@ private fun WideShell(
             }
             Spacer(Modifier.weight(1f))
         }
-        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan)
+        DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory)
     }
 }
 
@@ -238,6 +258,7 @@ private fun DestinationContent(
     modifier: Modifier,
     expanded: Boolean,
     onScan: () -> Unit,
+    libraryFactory: LibraryViewModel.Factory,
 ) {
     Column(
         modifier = modifier.padding(horizontal = if (expanded) 40.dp else 20.dp, vertical = 24.dp),
@@ -245,12 +266,32 @@ private fun DestinationContent(
     ) {
         Text(destination.label, style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
         when (destination) {
-            AppDestination.Library -> LibraryEmptyState(expanded, onScan)
+            AppDestination.Library -> LibraryRoute(expanded, libraryFactory)
             AppDestination.Search -> EmptyFeatureCard(Icons.Filled.Search, "Search every page", "Your on-device full-text index will appear here after the first document is processed.")
             AppDestination.Vault -> EmptyFeatureCard(Icons.Filled.Info, "Private Vault", "Biometric-protected documents stay encrypted and available only on this device.")
             AppDestination.Settings -> PrivacyDashboard()
         }
     }
+}
+
+@Composable
+private fun LibraryRoute(expanded: Boolean, factory: LibraryViewModel.Factory) {
+    val viewModel: LibraryViewModel = viewModel(factory = factory)
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val importer = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+        uri?.let { viewModel.onAction(LibraryAction.ImportSelected(it.toString())) }
+    }
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                LibraryEffect.LaunchImportPicker -> importer.launch(arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))
+                is LibraryEffect.Message -> Toast.makeText(context, effect.text, Toast.LENGTH_LONG).show()
+                is LibraryEffect.OpenDocument -> Toast.makeText(context, "Viewer is implemented in the OCR/PDF slice", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    LibraryScreen(state = state, columns = if (expanded) 3 else 1, onAction = viewModel::onAction, modifier = Modifier.fillMaxSize())
 }
 
 @Composable
