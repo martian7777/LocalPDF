@@ -160,17 +160,8 @@ class OfflineDocumentRepository(
     }
 
     private fun sniffMime(uri: Uri): String {
-        // InputStream.readNBytes(int) requires API 33; minSdk is 26, so read bounded bytes manually instead.
-        val bytes: ByteArray = context.contentResolver.openInputStream(uri).use { stream ->
-            val buffer = ByteArray(12)
-            var total = 0
-            while (stream != null && total < buffer.size) {
-                val count = stream.read(buffer, total, buffer.size - total)
-                if (count < 0) break
-                total += count
-            }
-            buffer.copyOf(total)
-        }
+        val stream = context.contentResolver.openInputStream(uri)
+        val bytes: ByteArray = stream.use { it?.readLeadingBytes(12) } ?: byteArrayOf()
         return when {
             bytes.take(4).toByteArray().contentEquals("%PDF".toByteArray()) -> "application/pdf"
             bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() -> "image/jpeg"
@@ -178,6 +169,18 @@ class OfflineDocumentRepository(
             bytes.size >= 12 && String(bytes, 0, 4) == "RIFF" && String(bytes, 8, 4) == "WEBP" -> "image/webp"
             else -> ""
         }
+    }
+
+    // InputStream.readNBytes(int) requires API 33; minSdk is 26, so read bounded bytes manually instead.
+    private fun java.io.InputStream.readLeadingBytes(maxBytes: Int): ByteArray {
+        val buffer = ByteArray(maxBytes)
+        var total = 0
+        while (total < buffer.size) {
+            val count = read(buffer, total, buffer.size - total)
+            if (count < 0) break
+            total += count
+        }
+        return buffer.copyOf(total)
     }
 
     private fun DocumentEntity.toModel(tags: List<String>) = Document(id, title, filePath, fileSize, pageCount, mimeType, DocumentClassification.valueOf(classification), isVaulted, isFavorite, tags, Instant.ofEpochMilli(createdAt), Instant.ofEpochMilli(updatedAt))
