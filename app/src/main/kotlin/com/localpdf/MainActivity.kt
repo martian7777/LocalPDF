@@ -96,6 +96,12 @@ import com.localpdf.feature.vault.VaultViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import android.widget.Toast
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.isSpecified
+import androidx.window.layout.FoldingFeature
+import androidx.window.layout.WindowInfoTracker
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
@@ -163,6 +169,17 @@ private enum class AppDestination(
 private enum class LayoutMode { Compact, Medium, Expanded }
 
 @Composable
+private fun rememberFoldingFeature(activity: android.app.Activity?): FoldingFeature? {
+    if (activity == null) return null
+    val feature by produceState<FoldingFeature?>(null, activity) {
+        WindowInfoTracker.getOrCreate(activity).windowLayoutInfo(activity).collect { info ->
+            value = info.displayFeatures.filterIsInstance<FoldingFeature>().firstOrNull()
+        }
+    }
+    return feature
+}
+
+@Composable
 private fun LocalPdfApp(
     cameraGranted: Boolean,
     cameraRequested: Boolean,
@@ -182,6 +199,11 @@ private fun LocalPdfApp(
         widthDp >= 600 -> LayoutMode.Medium
         else -> LayoutMode.Compact
     }
+    val foldingFeature = rememberFoldingFeature(LocalActivity.current)
+    val hingeGap = foldingFeature
+        ?.takeIf { it.isSeparating && it.orientation == FoldingFeature.Orientation.VERTICAL }
+        ?.let { feature -> with(LocalDensity.current) { feature.bounds.width().toDp() } }
+        ?: Dp.Unspecified
     var destination by remember { mutableStateOf(AppDestination.Library) }
     var scannerOpen by remember { mutableStateOf(false) }
     var openDocumentId by remember { mutableStateOf<String?>(null) }
@@ -236,6 +258,7 @@ private fun LocalPdfApp(
         } else {
             WideShell(
                 expanded = layoutMode == LayoutMode.Expanded,
+                hingeGap = hingeGap,
                 destination = destination,
                 onDestination = { destination = it },
                 onScan = { scannerOpen = true },
@@ -288,6 +311,7 @@ private fun CompactShell(
 @Composable
 private fun WideShell(
     expanded: Boolean,
+    hingeGap: Dp,
     destination: AppDestination,
     onDestination: (AppDestination) -> Unit,
     onScan: () -> Unit,
@@ -317,6 +341,8 @@ private fun WideShell(
             }
             Spacer(Modifier.weight(1f))
         }
+        // Keeps interactive content off a vertical, separating hinge (book/dual-pane foldable posture).
+        if (hingeGap.isSpecified) Spacer(Modifier.fillMaxHeight().width(hingeGap).background(MaterialTheme.colorScheme.background))
         DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory, onOpenDocument = onOpenDocument, vaultFactory = vaultFactory)
     }
 }
