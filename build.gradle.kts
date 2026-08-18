@@ -5,4 +5,17 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.detekt)
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    parallel = true
+    baseline = file("$rootDir/config/detekt/baseline.xml")
+    source.setFrom(
+        fileTree(rootDir) {
+            include("**/src/main/kotlin/**/*.kt", "**/src/test/kotlin/**/*.kt")
+            exclude("**/build/**")
+        },
+    )
 }

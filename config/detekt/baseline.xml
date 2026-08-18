@@ -1,0 +1,445 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:OfflineDocumentRepository.kt$OfflineDocumentRepository$override suspend fun importDocument(sourceUri: String): Result&lt;Document&gt;</ID>
+    <ID>CyclomaticComplexMethod:ScannerScreen.kt$@Composable fun ScannerScreen(onClose: () -&gt; Unit, onFinished: (List&lt;String&gt;) -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>EmptyElseBlock:DocumentInspector.kt$PdfEngine$if (rotated !== source) rotated.recycle()</ID>
+    <ID>EmptyFunctionBlock:VaultViewModelTest.kt$FakeVaultRepository${}</ID>
+    <ID>FunctionNaming:DocumentViewer.kt$@Composable fun DocumentViewerScreen( state: ViewerUiState, onAction: (ViewerAction) -&gt; Unit, onBack: () -&gt; Unit, onMoveToVault: (String) -&gt; Unit, onCreateRedactedCopy: (String, List&lt;RedactionRegion&gt;) -&gt; Unit, onCreateEditedCopy: (String, List&lt;PageEditState&gt;, String?) -&gt; Unit, onShare: (String) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:DocumentViewer.kt$@Composable private fun PageCard(page: DocumentPage, onAction: (ViewerAction) -&gt; Unit)</ID>
+    <ID>FunctionNaming:EditorDialog.kt$@Composable fun EditorDialog(pages: List&lt;DocumentPage&gt;, onDismiss: () -&gt; Unit, onConfirm: (List&lt;PageEditState&gt;, String?) -&gt; Unit)</ID>
+    <ID>FunctionNaming:LibraryScreen.kt$@Composable fun LibraryScreen( state: LibraryUiState, columns: Int, onAction: (LibraryAction) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>FunctionNaming:LibraryScreen.kt$@Composable private fun DocumentCard(document: Document, onOpen: () -&gt; Unit, onFavorite: () -&gt; Unit, onDelete: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:LibraryScreen.kt$@Composable private fun LibraryEmpty(onImport: () -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:LocalPdfTheme.kt$@Composable fun GlassSurface( modifier: Modifier = Modifier, shape: Shape = RoundedCornerShape(24.dp), content: @Composable BoxScope.() -&gt; Unit, )</ID>
+    <ID>FunctionNaming:LocalPdfTheme.kt$@Composable fun LocalPdfTheme( darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun CompactShell( destination: AppDestination, onDestination: (AppDestination) -&gt; Unit, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun DestinationContent( destination: AppDestination, modifier: Modifier, expanded: Boolean, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun EmptyFeatureCard(icon: ImageVector, title: String, detail: String)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun LibraryEmptyState(expanded: Boolean, onScan: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun LibraryRoute(expanded: Boolean, factory: LibraryViewModel.Factory, onOpenDocument: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun LocalPdfApp( cameraGranted: Boolean, cameraRequested: Boolean, onRequestCamera: () -&gt; Unit, onOpenSettings: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, documentRepository: OfflineDocumentRepository, searchFactory: SearchViewModel.Factory, vaultFactory: VaultViewModel.Factory, vaultRepository: VaultRepository, redactionRepository: com.localpdf.core.data.RedactionRepository, editorRepository: EditorRepository, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun Metric(label: String, value: String)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun PrivacyDashboard()</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun ScannerPlaceholder( cameraGranted: Boolean, cameraRequested: Boolean, onRequestCamera: () -&gt; Unit, onOpenSettings: () -&gt; Unit, onClose: () -&gt; Unit, )</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun SearchRoute(factory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun VaultRoute(factory: VaultViewModel.Factory)</ID>
+    <ID>FunctionNaming:MainActivity.kt$@Composable private fun WideShell( expanded: Boolean, hingeGap: Dp, destination: AppDestination, onDestination: (AppDestination) -&gt; Unit, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>FunctionNaming:OcrCorrectionDialog.kt$@Composable fun OcrCorrectionDialog(block: OcrBlock, onDismiss: () -&gt; Unit, onSave: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:RedactionDialog.kt$@Composable fun RedactionDialog(pages: List&lt;DocumentPage&gt;, onDismiss: () -&gt; Unit, onConfirm: (List&lt;RedactionRegion&gt;) -&gt; Unit)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable fun ScannerScreen(onClose: () -&gt; Unit, onFinished: (List&lt;String&gt;) -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun CornerHandle(label: String, point: QuadPoint, boxSize: IntSize, onDrag: (QuadPoint) -&gt; Unit)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun FilterOption(filter: PageFilter, selected: Boolean, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun PageThumbnail(page: CapturedPage, index: Int, selected: Boolean, onClick: () -&gt; Unit)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun PageTray(pages: List&lt;CapturedPage&gt;, selectedId: String?, onSelect: (String) -&gt; Unit, onMoveLeft: (String) -&gt; Unit, onMoveRight: (String) -&gt; Unit, onRemove: (String) -&gt; Unit)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun QuadOverlay(quad: DocumentQuad, color: Color)</ID>
+    <ID>FunctionNaming:ScannerScreen.kt$@Composable private fun ReviewStage(file: File, initialQuad: DocumentQuad, processing: Boolean, onRetake: () -&gt; Unit, onConfirm: (DocumentQuad, PageFilter) -&gt; Unit)</ID>
+    <ID>FunctionNaming:SearchFeature.kt$@Composable fun SearchScreen(state: SearchUiState, onAction: (SearchAction) -&gt; Unit, onOpen: (String) -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>FunctionNaming:VaultFeature.kt$@Composable fun VaultScreen(documents: List&lt;Document&gt;, onUnlock: (Document) -&gt; Unit, onRestore: (Document) -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>LongMethod:MainActivity.kt$@Composable private fun LocalPdfApp( cameraGranted: Boolean, cameraRequested: Boolean, onRequestCamera: () -&gt; Unit, onOpenSettings: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, documentRepository: OfflineDocumentRepository, searchFactory: SearchViewModel.Factory, vaultFactory: VaultViewModel.Factory, vaultRepository: VaultRepository, redactionRepository: com.localpdf.core.data.RedactionRepository, editorRepository: EditorRepository, )</ID>
+    <ID>LongMethod:ScannerScreen.kt$@Composable fun ScannerScreen(onClose: () -&gt; Unit, onFinished: (List&lt;String&gt;) -&gt; Unit, modifier: Modifier = Modifier)</ID>
+    <ID>LongParameterList:DocumentEdgeDetector.kt$DocumentEdgeDetector$(buffer: ByteBuffer, output: ByteArray, width: Int, height: Int, rowStride: Int, pixelStride: Int)</ID>
+    <ID>LongParameterList:DocumentViewer.kt$( state: ViewerUiState, onAction: (ViewerAction) -&gt; Unit, onBack: () -&gt; Unit, onMoveToVault: (String) -&gt; Unit, onCreateRedactedCopy: (String, List&lt;RedactionRegion&gt;) -&gt; Unit, onCreateEditedCopy: (String, List&lt;PageEditState&gt;, String?) -&gt; Unit, onShare: (String) -&gt; Unit, modifier: Modifier = Modifier, )</ID>
+    <ID>LongParameterList:MainActivity.kt$( cameraGranted: Boolean, cameraRequested: Boolean, onRequestCamera: () -&gt; Unit, onOpenSettings: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, documentRepository: OfflineDocumentRepository, searchFactory: SearchViewModel.Factory, vaultFactory: VaultViewModel.Factory, vaultRepository: VaultRepository, redactionRepository: com.localpdf.core.data.RedactionRepository, editorRepository: EditorRepository, )</ID>
+    <ID>LongParameterList:MainActivity.kt$( destination: AppDestination, modifier: Modifier, expanded: Boolean, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>LongParameterList:MainActivity.kt$( destination: AppDestination, onDestination: (AppDestination) -&gt; Unit, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>LongParameterList:MainActivity.kt$( expanded: Boolean, hingeGap: Dp, destination: AppDestination, onDestination: (AppDestination) -&gt; Unit, onScan: () -&gt; Unit, libraryFactory: LibraryViewModel.Factory, searchFactory: SearchViewModel.Factory, onOpenDocument: (String) -&gt; Unit, vaultFactory: VaultViewModel.Factory, )</ID>
+    <ID>LongParameterList:ScannerScreen.kt$(pages: List&lt;CapturedPage&gt;, selectedId: String?, onSelect: (String) -&gt; Unit, onMoveLeft: (String) -&gt; Unit, onMoveRight: (String) -&gt; Unit, onRemove: (String) -&gt; Unit)</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$.18</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$0.02</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$180</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$200.0</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$360</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$4L</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$5.0</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$55.0</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$75.0</ID>
+    <ID>MagicNumber:DocumentEdgeDetector.kt$DocumentEdgeDetector$90</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$100</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$120</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$12f</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$180</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$24f</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$270</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$30f</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$360</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$40</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$80</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$8f</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$90</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$92</ID>
+    <ID>MagicNumber:DocumentInspector.kt$PdfEngine$96</ID>
+    <ID>MagicNumber:DocumentProcessingWorker.kt$DocumentProcessingWorker$300</ID>
+    <ID>MagicNumber:DocumentViewer.kt$ViewerViewModel$5_000</ID>
+    <ID>MagicNumber:LibraryScreen.kt$0xFFF59E0B</ID>
+    <ID>MagicNumber:LibraryScreen.kt$1024</ID>
+    <ID>MagicNumber:LibraryScreen.kt$1024.0</ID>
+    <ID>MagicNumber:LibraryViewModel.kt$LibraryViewModel$5_000</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0x73111827</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xB3263447</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xB3F1F5F9</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xE6FFFFFF</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF059669</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF0B0F19</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF111827</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF34D399</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF4F46E5</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFF818CF8</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFFE11D48</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFFF8FAFC</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFFFB7185</ID>
+    <ID>MagicNumber:LocalPdfTheme.kt$0xFFFFFFFF</ID>
+    <ID>MagicNumber:MainActivity.kt$0.68f</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF05070C</ID>
+    <ID>MagicNumber:MainActivity.kt$0xFF818CF8</ID>
+    <ID>MagicNumber:MainActivity.kt$600</ID>
+    <ID>MagicNumber:MainActivity.kt$840</ID>
+    <ID>MagicNumber:OcrCorrectionDialog.kt$100</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$0x0A</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$0x1A</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$0x47</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$0x4E</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$0x50</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$12</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$3</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$4</ID>
+    <ID>MagicNumber:OfflineDocumentRepository.kt$OfflineDocumentRepository$8</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$.04</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$.2</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$.35f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.224f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.225f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.229f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.406f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.456f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0.485f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$0xff</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$12</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$126</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$127.5f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$16</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$255.0</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$255f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$3</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$3.0</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$300</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$32</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$320</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$35</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$4</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$48</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$48f</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$8</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$80</ID>
+    <ID>MagicNumber:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$960</ID>
+    <ID>MagicNumber:PagePreprocessor.kt$PagePreprocessor$1.15</ID>
+    <ID>MagicNumber:PagePreprocessor.kt$PagePreprocessor$15.0</ID>
+    <ID>MagicNumber:PagePreprocessor.kt$PagePreprocessor$25</ID>
+    <ID>MagicNumber:PagePreprocessor.kt$PagePreprocessor$255.0</ID>
+    <ID>MagicNumber:PagePreprocessor.kt$PagePreprocessor$8.0</ID>
+    <ID>MagicNumber:ScannerScreen.kt$.3f</ID>
+    <ID>MagicNumber:ScannerScreen.kt$.58f</ID>
+    <ID>MagicNumber:ScannerScreen.kt$.5f</ID>
+    <ID>MagicNumber:ScannerScreen.kt$.6f</ID>
+    <ID>MagicNumber:ScannerScreen.kt$.8f</ID>
+    <ID>MagicNumber:ScannerScreen.kt$0xFF34D399</ID>
+    <ID>MagicNumber:ScannerScreen.kt$0xFFF87171</ID>
+    <ID>MagicNumber:ScannerScreen.kt$1200</ID>
+    <ID>MagicNumber:ScannerScreen.kt$180</ID>
+    <ID>MagicNumber:ScannerScreen.kt$200</ID>
+    <ID>MagicNumber:ScannerScreen.kt$270</ID>
+    <ID>MagicNumber:ScannerScreen.kt$65</ID>
+    <ID>MagicNumber:ScannerScreen.kt$90</ID>
+    <ID>MagicNumber:ScannerScreen.kt$92</ID>
+    <ID>MagicNumber:SearchFeature.kt$.65f</ID>
+    <ID>MagicNumber:SearchFeature.kt$SearchViewModel$250</ID>
+    <ID>MagicNumber:SearchFeature.kt$SearchViewModel$5_000</ID>
+    <ID>MagicNumber:SearchRepository.kt$FtsQuerySanitizer$12</ID>
+    <ID>MagicNumber:VaultFeature.kt$VaultViewModel$5_000</ID>
+    <ID>MagicNumber:VaultRepository.kt$KeystoreVaultRepository$12</ID>
+    <ID>MagicNumber:VaultRepository.kt$KeystoreVaultRepository$128</ID>
+    <ID>MagicNumber:VaultRepository.kt$KeystoreVaultRepository$16</ID>
+    <ID>MagicNumber:VaultRepository.kt$KeystoreVaultRepository$256</ID>
+    <ID>MagicNumber:VaultRepository.kt$KeystoreVaultRepository$30</ID>
+    <ID>MatchingDeclarationName:EditorDialog.kt$PageEditState</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$dao.insertComplete(document("doc-1", "Invoice", "hash-1"), listOf(PageEntity("doc-1-0", "doc-1", 0, null, 800, 1200)), emptyList())</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$dao.replaceFts(DocumentFtsEntity(documentId = "doc-1", title = "Acme Invoice", content = "Total 420.00 due September", classification = "INVOICE", keywords = "420.00"))</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$dao.replaceFts(DocumentFtsEntity(documentId = "doc-1", title = "Invoice", content = "first version", classification = "INVOICE", keywords = ""))</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$dao.replaceFts(DocumentFtsEntity(documentId = "doc-1", title = "Invoice", content = "second version", classification = "INVOICE", keywords = ""))</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$dao.replaceFts(DocumentFtsEntity(documentId = "doc-2", title = "Unrelated Receipt", content = "grocery items", classification = "RECEIPT", keywords = ""))</ID>
+    <ID>MaxLineLength:DocumentDaoTest.kt$DocumentDaoTest$database</ID>
+    <ID>MaxLineLength:DocumentEdgeDetector.kt$DocumentEdgeDetector$contours.forEach(Mat::release)</ID>
+    <ID>MaxLineLength:DocumentEdgeDetector.kt$DocumentEdgeDetector$private</ID>
+    <ID>MaxLineLength:DocumentEdgeDetector.kt$DocumentEdgeDetector$try { Core.meanStdDev(laplacian, mu, sigma); sigma.get(0, 0)[0].let { it * it } } finally { mu.release(); sigma.release() }</ID>
+    <ID>MaxLineLength:DocumentEdgeDetector.kt$DocumentEdgeDetector$val code = when (normalized) { 90 -&gt; Core.ROTATE_90_CLOCKWISE; 180 -&gt; Core.ROTATE_180; else -&gt; Core.ROTATE_90_COUNTERCLOCKWISE }</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$File(outputDirectory, "page-${index + 1}.jpg").also { file -&gt; file.outputStream().use { bitmap.compress(Bitmap.CompressFormat.JPEG, 92, it) }; bitmap.recycle() }</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$bitmap.eraseColor(Color.WHITE)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$document.finishPage(page)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$fun</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$fun mergeToPdf(pageImages: List&lt;File&gt;, output: File, jpegQuality: Int = 90): File</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$fun splitToPdfs(pages: List&lt;File&gt;, outputDirectory: File, jpegQuality: Int = 90): List&lt;File&gt;</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$page.canvas.drawText(block.text, block.boundingBox.left * bitmap.width, block.boundingBox.bottom * bitmap.height, paint)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$pageRegions.forEach { region -&gt; canvas.drawRect(region.bounds.left * bitmap.width, region.bounds.top * bitmap.height, region.bounds.right * bitmap.width, region.bounds.bottom * bitmap.height, paint) }</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$paint.textSize = ((block.boundingBox.bottom - block.boundingBox.top) * bitmap.height).coerceAtLeast(8f)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$private fun overlaps(a: com.localpdf.core.model.BoundingBox, b: com.localpdf.core.model.BoundingBox): Boolean</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$require(pages.isNotEmpty()) { "Keep at least one page" }</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val bitmap = Bitmap.createBitmap((page.width * scale).toInt(), (page.height * scale).toInt(), Bitmap.Config.RGB_565)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val bitmap = requireNotNull(BitmapFactory.decodeFile(image.absolutePath)).copy(Bitmap.Config.ARGB_8888, true)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val compressed = java.io.ByteArrayOutputStream().use { bytes -&gt; rotated.compress(Bitmap.CompressFormat.JPEG, jpegQuality, bytes); BitmapFactory.decodeByteArray(bytes.toByteArray(), 0, bytes.size()) }</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val page = document.startPage(PdfDocument.PageInfo.Builder(compressed.width, compressed.height, index + 1).create())</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val rotated = if (rotation == 0) source else Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$val source = requireNotNull(BitmapFactory.decodeFile(edit.image.absolutePath))</ID>
+    <ID>MaxLineLength:DocumentInspector.kt$PdfEngine$watermark?.trim()?.takeIf(String::isNotEmpty)?.let { text -&gt; val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = Color.argb(90, 120, 0, 0); textSize = (compressed.width / 12f).coerceAtLeast(24f); textAlign = Paint.Align.CENTER }; page.canvas.save(); page.canvas.rotate(-30f, compressed.width / 2f, compressed.height / 2f); page.canvas.drawText(text.take(80), compressed.width / 2f, compressed.height / 2f, paint); page.canvas.restore() }</ID>
+    <ID>MaxLineLength:DocumentIntelligence.kt$DocumentIntelligence$"bank statement" in normalized || ("account" in normalized &amp;&amp; "balance" in normalized) -&gt; DocumentClassification.BANK_STATEMENT</ID>
+    <ID>MaxLineLength:DocumentIntelligence.kt$DocumentIntelligence$listOf("invoice", "invoice no", "bill to").count(normalized::contains) &gt;= 2 -&gt; DocumentClassification.INVOICE</ID>
+    <ID>MaxLineLength:DocumentIntelligence.kt$DocumentIntelligence$listOf("utility", "meter", "units consumed", "due date").count(normalized::contains) &gt;= 2 -&gt; DocumentClassification.UTILITY_BILL</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.insertEntities(fields.map { ExtractedEntityEntity(UUID.randomUUID().toString(), firstPageId, it.type.name, it.value) })</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.insertOcrBlocks(blocks.map { OcrBlockEntity(it.id, it.pageId, it.text, it.confidence, it.boundingBox.left, it.boundingBox.top, it.boundingBox.right, it.boundingBox.bottom, it.language) })</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.replaceFts(DocumentFtsEntity(documentId = id, title = document.title, content = text, classification = classification.name, keywords = fields.joinToString(" ") { it.value }))</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.updateOutput(id, output.absolutePath, output.length(), ProcessingState.READY.name, System.currentTimeMillis())</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.updateProcessing(id, classification.name, ProcessingState.PROCESSING.name, null, System.currentTimeMillis())</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.updateProcessing(id, document.classification, ProcessingState.FAILED.name, error.message?.take(300), System.currentTimeMillis())</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$dao.updateProcessing(id, document.classification, ProcessingState.PROCESSING.name, null, System.currentTimeMillis())</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$if (runAttemptCount &lt; 2) Result.retry() else Result.failure(Data.Builder().putString("error", error.message).build())</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$val dimensions = BitmapFactory.Options().also { it.inJustDecodeBounds = true; BitmapFactory.decodeFile(image.absolutePath, it) }</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker$val imageFiles = if (document.mimeType == "application/pdf") PdfEngine.renderPages(source, document.mimeType, File(directory, "rendered")) else dao.getPages(id).mapNotNull { it.imagePath?.let(::File) }</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker.Companion$WorkManager.getInstance(context).enqueueUniqueWork("document_process_$documentId", ExistingWorkPolicy.KEEP, request)</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker.Companion$WorkManager.getInstance(context).enqueueUniqueWork("document_process_$documentId", ExistingWorkPolicy.REPLACE, request)</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker.Companion$val request = OneTimeWorkRequestBuilder&lt;DocumentProcessingWorker&gt;().setInputData(Data.Builder().putString(KEY_ID, documentId).build()).addTag("document_process_$documentId").build()</ID>
+    <ID>MaxLineLength:DocumentProcessingWorker.kt$DocumentProcessingWorker.Companion$val request = OneTimeWorkRequestBuilder&lt;DocumentProcessingWorker&gt;().setInputData(input).addTag("document_process_$documentId").build()</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$Column(Modifier.weight(1f)) { Text(state.document?.title ?: "Loading document", style = MaterialTheme.typography.titleLarge); Text("Tap recognized text to correct it", style = MaterialTheme.typography.bodySmall) }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ElevatedCard</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ViewerAction</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ViewerUiState</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ViewerViewModel$Factory : Factory</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ViewerViewModel$is ViewerAction.SaveCorrection -&gt; selected.value?.let { block -&gt; viewModelScope.launch { repository.correctOcr(id, block.id, action.text); selected.value = null } }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$ViewerViewModel$val</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$bitmap?.let { Image(it.asImageBitmap(), "Page ${page.pageIndex + 1}", Modifier.fillMaxWidth().aspectRatio(it.width.toFloat() / it.height), contentScale = ContentScale.Fit) }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$if</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$if (showEditor) EditorDialog(state.pages, { showEditor = false }) { edits, watermark -&gt; state.document?.let { onCreateEditedCopy(it.id, edits, watermark) }; showEditor = false }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$if (showRedaction) RedactionDialog(state.pages, { showRedaction = false }) { regions -&gt; state.document?.let { onCreateRedactedCopy(it.id, regions) }; showRedaction = false }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$page.ocrBlocks.forEach { block -&gt; Text(block.text, Modifier.fillMaxWidth().clickable { onAction(ViewerAction.SelectBlock(block)) }.padding(vertical = 6.dp), color = if (block.confidence &lt; .75f) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface) }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$state.selected?.let { block -&gt; OcrCorrectionDialog(block, { onAction(ViewerAction.DismissCorrection) }, { onAction(ViewerAction.SaveCorrection(it)) }) }</ID>
+    <ID>MaxLineLength:DocumentViewer.kt$val bitmap by produceState&lt;android.graphics.Bitmap?&gt;(null, page.imagePath) { value = withContext(Dispatchers.IO) { page.imagePath?.let(BitmapFactory::decodeFile) } }</ID>
+    <ID>MaxLineLength:EditorDialog.kt$Button(enabled = edits.any { !it.deleted }, onClick = { onConfirm(edits.toList(), watermark.trim().ifBlank { null }) }) { Text("Save copy") }</ID>
+    <ID>MaxLineLength:EditorDialog.kt$IconButton</ID>
+    <ID>MaxLineLength:EditorDialog.kt$OutlinedTextField(value = watermark, onValueChange = { watermark = it }, label = { Text("Watermark (optional)") }, singleLine = true)</ID>
+    <ID>MaxLineLength:EditorDialog.kt$Row</ID>
+    <ID>MaxLineLength:EditorRepository.kt$EditorRepository$suspend fun createEditedCopy(documentId: String, pageEdits: List&lt;EditorPageEdit&gt;, watermark: String?, quality: Int = 90): Result&lt;Document&gt;</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$Companion</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$Document(newId, entity.title, pdf.absolutePath, pdf.length(), inspected.pageCount, "application/pdf", DocumentClassification.valueOf(entity.classification), tags = listOf("edited-copy"), createdAt = Instant.ofEpochMilli(now), updatedAt = Instant.ofEpochMilli(now))</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$override suspend</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$val entity = DocumentEntity(newId, "${source.title} — edited", pdf.absolutePath, pdf.length(), inspected.pageCount, "application/pdf", source.classification, false, false, ProcessingState.READY.name, null, hash, now, now)</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$val hash = MessageDigest.getInstance("SHA-256").digest(pdf.readBytes()).joinToString("") { "%02x".format(it) }</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$val pageEntities = List(inspected.pageCount) { index -&gt; PageEntity("$newId-$index", newId, index, null, inspected.widthPx, inspected.heightPx) }</ID>
+    <ID>MaxLineLength:EditorRepository.kt$OfflineEditorRepository$val source = requireNotNull(dao.getById(documentId))</ID>
+    <ID>MaxLineLength:FtsQuerySanitizerTest.kt$FtsQuerySanitizerTest$@Test fun stripsFtsOperators()</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$IconButton(onClick = onDelete) { Icon(Icons.Filled.Delete, "Delete document", tint = MaterialTheme.colorScheme.error) }</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$IconButton(onClick = onFavorite) { Icon(Icons.Filled.Star, "Favorite", tint = if (document.isFavorite) Color(0xFFF59E0B) else MaterialTheme.colorScheme.onSurface.copy(alpha = .4f)) }</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$OutlinedButton(onClick = onImport) { Icon(Icons.Filled.Add, null); Spacer(Modifier.width(8.dp)); Text("Import file") }</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$Row</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$Text("${document.pageCount} page${if (document.pageCount == 1) "" else "s"} • ${formatSize(document.fileSizeBytes)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f))</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$Text("Import an existing PDF or image, or scan a new document. Files remain on this device.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = .72f))</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$Text("Your private document workspace", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$Text(DateTimeFormatter.ofPattern("MMM d, yyyy").withZone(ZoneId.systemDefault()).format(document.updatedAt), style = MaterialTheme.typography.labelSmall)</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$confirmButton = { TextButton(onClick = { onAction(LibraryAction.DeleteConfirmed) }) { Text("Delete", color = MaterialTheme.colorScheme.error) } }</ID>
+    <ID>MaxLineLength:LibraryScreen.kt$state.documents.isEmpty() -&gt; LibraryEmpty(onImport = { onAction(LibraryAction.ImportClicked) }, Modifier.align(Alignment.Center))</ID>
+    <ID>MaxLineLength:LibraryViewModel.kt$LibraryViewModel$LibraryUiState(sorted, isLoading = false, isImporting = isImporting, sort = selectedSort, pendingDelete = deleting)</ID>
+    <ID>MaxLineLength:LibraryViewModel.kt$LibraryViewModel$is LibraryAction.FavoriteChanged -&gt; viewModelScope.launch { repository.setFavorite(action.id, action.favorite).onFailure(::showError) }</ID>
+    <ID>MaxLineLength:LibraryViewModel.kt$LibraryViewModel$repository.importDocument(uri).onSuccess { effectsChannel.send(LibraryEffect.Message("Document imported")) }.onFailure(::showError)</ID>
+    <ID>MaxLineLength:LibraryViewModel.kt$LibraryViewModel$val</ID>
+    <ID>MaxLineLength:LibraryViewModelTest.kt$FakeDocumentRepository$override suspend fun correctOcr(documentId: String, blockId: String, text: String): Result&lt;Unit&gt;</ID>
+    <ID>MaxLineLength:LibraryViewModelTest.kt$FakeDocumentRepository$val result = importResult ?: Result.success(Document(sourceUri, "Imported", "/data/x.pdf", 10, 1, createdAt = Instant.now(), updatedAt = Instant.now()))</ID>
+    <ID>MaxLineLength:LibraryViewModelTest.kt$LibraryViewModelTest$id</ID>
+    <ID>MaxLineLength:LibraryViewModelTest.kt$LibraryViewModelTest$val repository = FakeDocumentRepository(emptyList(), importResult = Result.failure(DuplicateDocumentException()))</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$@Query("SELECT * FROM ocr_blocks WHERE page_id IN (SELECT id FROM pages WHERE document_id = :documentId) ORDER BY page_id, top, left")</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$@Query("SELECT d.id, d.title, d.file_path, d.file_size, d.page_count, d.mime_type, d.classification, d.is_vaulted, d.is_favorite, d.created_at, d.updated_at, snippet(document_fts, 2, '[', ']', '…', 18) AS snippet FROM document_fts JOIN documents d ON d.id = document_fts.document_id WHERE document_fts MATCH :query AND d.is_vaulted = 0 ORDER BY d.updated_at DESC LIMIT 100")</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$@Query("UPDATE documents SET classification = :classification, processing_state = :state, failure_reason = :failure, updated_at = :updatedAt WHERE id = :documentId")</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$@Query("UPDATE documents SET file_path = :path, file_size = :size, is_vaulted = :vaulted, updated_at = :updatedAt WHERE id = :documentId")</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$@Query("UPDATE documents SET file_path = :path, file_size = :size, processing_state = :state, updated_at = :updatedAt WHERE id = :documentId")</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$DocumentDao$suspend</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$ExtractedEntityEntity$foreignKeys = [ForeignKey(entity = PageEntity::class, parentColumns = ["id"], childColumns = ["page_id"], onDelete = ForeignKey.CASCADE)]</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$LocalPdfDatabase$@Database(entities = [DocumentEntity::class, PageEntity::class, TagEntity::class, OcrBlockEntity::class, ExtractedEntityEntity::class, DocumentFtsEntity::class], version = 1, exportSchema = true)</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$OcrBlockEntity$foreignKeys = [ForeignKey(entity = PageEntity::class, parentColumns = ["id"], childColumns = ["page_id"], onDelete = ForeignKey.CASCADE)]</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$PageEntity$foreignKeys = [ForeignKey(entity = DocumentEntity::class, parentColumns = ["id"], childColumns = ["document_id"], onDelete = ForeignKey.CASCADE)]</ID>
+    <ID>MaxLineLength:LocalPdfDatabase.kt$TagEntity$foreignKeys = [ForeignKey(entity = DocumentEntity::class, parentColumns = ["id"], childColumns = ["document_id"], onDelete = ForeignKey.CASCADE)]</ID>
+    <ID>MaxLineLength:MainActivity.kt$Box</ID>
+    <ID>MaxLineLength:MainActivity.kt$DestinationContent(destination, Modifier.padding(padding), expanded = false, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory, onOpenDocument = onOpenDocument, vaultFactory = vaultFactory)</ID>
+    <ID>MaxLineLength:MainActivity.kt$DestinationContent(destination, Modifier.weight(1f), expanded = expanded, onScan = onScan, libraryFactory = libraryFactory, searchFactory = searchFactory, onOpenDocument = onOpenDocument, vaultFactory = vaultFactory)</ID>
+    <ID>MaxLineLength:MainActivity.kt$Icon(Icons.Filled.Home, contentDescription = null, modifier = Modifier.size(56.dp), tint = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:MainActivity.kt$Icon(Icons.Filled.Info, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.secondary)</ID>
+    <ID>MaxLineLength:MainActivity.kt$Icon(icon, contentDescription = null, modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.primary)</ID>
+    <ID>MaxLineLength:MainActivity.kt$LibraryEffect.LaunchImportPicker -&gt; importer.launch(arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))</ID>
+    <ID>MaxLineLength:MainActivity.kt$LibraryScreen(state = state, columns = if (expanded) 3 else 1, onAction = viewModel::onAction, modifier = Modifier.fillMaxSize())</ID>
+    <ID>MaxLineLength:MainActivity.kt$MainActivity$cameraGranted = checkSelfPermission(Manifest.permission.CAMERA) == android.content.pm.PackageManager.PERMISSION_GRANTED</ID>
+    <ID>MaxLineLength:MainActivity.kt$Text("Core features are designed to work offline.", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f))</ID>
+    <ID>MaxLineLength:MainActivity.kt$Text("Scan your first page. Processing, OCR, search, and storage remain on your device.", style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.72f))</ID>
+    <ID>MaxLineLength:MainActivity.kt$Text("Your private document workspace", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.SemiBold)</ID>
+    <ID>MaxLineLength:MainActivity.kt$VaultScreen(documents, onUnlock = { doc -&gt; auth("Unlock ${doc.title}") { vm.open(doc.id, { Toast.makeText(activity, "Unlocked temporary copy created", Toast.LENGTH_SHORT).show() }, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } }, onRestore = { doc -&gt; auth("Restore ${doc.title}") { vm.restore(doc.id, {}, { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) } })</ID>
+    <ID>MaxLineLength:MainActivity.kt$cameraGranted -&gt; "The permission boundary is ready. CameraX preview and edge detection will connect here without changing navigation."</ID>
+    <ID>MaxLineLength:MainActivity.kt$fun auth(title: String, action: () -&gt; Unit)</ID>
+    <ID>MaxLineLength:MainActivity.kt$if (hingeGap.isSpecified) Spacer(Modifier.fillMaxHeight().width(hingeGap).background(MaterialTheme.colorScheme.background))</ID>
+    <ID>MaxLineLength:MainActivity.kt$onCreateEditedCopy = { id, edits, watermark -&gt; appScope.launch { editorRepository.createEditedCopy(id, edits.map { EditorPageEdit(it.pageId, it.rotationDegrees, it.deleted) }, watermark).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Edited copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }</ID>
+    <ID>MaxLineLength:MainActivity.kt$onCreateRedactedCopy = { id, regions -&gt; appScope.launch { redactionRepository.createPermanentCopy(id, regions).onSuccess { openDocumentId = it.id; Toast.makeText(activity, "Verified flattened copy created", Toast.LENGTH_SHORT).show() }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }</ID>
+    <ID>MaxLineLength:MainActivity.kt$onMoveToVault = { id -&gt; VaultAuthenticator.authenticate(activity, "Protect document", onSuccess = { appScope.launch { vaultRepository.moveToVault(id).onSuccess { openDocumentId = null; destination = AppDestination.Vault }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }, onError = { Toast.makeText(activity, it, Toast.LENGTH_LONG).show() }) }</ID>
+    <ID>MaxLineLength:MainActivity.kt$onShare = { id -&gt; appScope.launch { documentRepository.prepareShareCopy(id).onSuccess { file -&gt; val uri = androidx.core.content.FileProvider.getUriForFile(activity, "${activity.packageName}.files", file); val mime = if (file.extension == "pdf") "application/pdf" else "image/*"; val intent = Intent(Intent.ACTION_SEND).apply { type = mime; putExtra(Intent.EXTRA_STREAM, uri); addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION) }; activity.startActivity(Intent.createChooser(intent, "Share document")) }.onFailure { Toast.makeText(activity, it.message, Toast.LENGTH_LONG).show() } } }</ID>
+    <ID>MaxLineLength:MainActivity.kt$val viewer: ViewerViewModel = viewModel(key = openDocumentId, factory = ViewerViewModel.Factory(openDocumentId!!, documentRepository))</ID>
+    <ID>MaxLineLength:MainActivity.kt$val vm: VaultViewModel = viewModel(factory = factory)</ID>
+    <ID>MaxLineLength:MainActivity.kt$}</ID>
+    <ID>MaxLineLength:OcrCorrectionDialog.kt$confirmButton = { TextButton(enabled = text.isNotBlank(), onClick = { onSave(text) }) { Text("Save and rebuild PDF") } }</ID>
+    <ID>MaxLineLength:OcrCorrectionDialog.kt$text = { OutlinedTextField(value = text, onValueChange = { text = it }, supportingText = { Text("Confidence ${(block.confidence * 100).toInt()}% · stored only on this device") }) }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$List(inspected.pageCount) { index -&gt; PageEntity("$id-$index", id, index, if (inspected.pageCount == 1 &amp;&amp; type != "application/pdf") destination.absolutePath else null, inspected.widthPx, inspected.heightPx) }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$byPage[page.id].orEmpty().map { block -&gt; OcrBlock(block.id, block.pageId, block.text, block.confidence, BoundingBox(block.left, block.top, block.right, block.bottom), block.language) }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$bytes.take(8).toByteArray().contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)) -&gt; "image/png"</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$copied.forEach { file -&gt; file.inputStream().use { input -&gt; input.copyTo(object : java.io.OutputStream() { override fun write(b: Int) { hashDigest.update(b.toByte()) }; override fun write(b: ByteArray, off: Int, len: Int) { hashDigest.update(b, off, len) } }) } }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$if (declaredSize &gt; 0) require(context.filesDir.usableSpace &gt; declaredSize * 2) { "Not enough device storage" }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$override</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$override suspend fun rename(id: String, title: String)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$override suspend fun setFavorite(id: String, favorite: Boolean)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$private fun Document.toEntity(hash: String, state: ProcessingState)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$private fun DocumentEntity.toModel(tags: List&lt;String&gt;)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val document = Document(id, "Scan ${java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH-mm").withZone(java.time.ZoneId.systemDefault()).format(now)}", directory.absolutePath, copied.sumOf(File::length), copied.size, "application/x-localpdf-scan", createdAt = now, updatedAt = now)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val document = Document(id, title, destination.absolutePath, destination.length(), inspected.pageCount, type, createdAt = now, updatedAt = now)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val extension = when (type) { "application/pdf" -&gt; "pdf"; "image/png" -&gt; "png"; "image/webp" -&gt; "webp"; else -&gt; "jpg" }</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val source = File(path)</ID>
+    <ID>MaxLineLength:OfflineDocumentRepository.kt$OfflineDocumentRepository$val target = File(context.cacheDir, "shared/$safeName.${source.extension.ifBlank { "pdf" }}").apply { parentFile?.mkdirs() }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$/** Expands the box outward by DBPostProcess's unclip formula (area * ratio / perimeter) before rescaling to source pixels. */</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$// NormalizeImage applies mean/std positionally to the BGR-ordered tensor produced by DecodeImage(img_mode: BGR).</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$OnnxTensor.createTensor(environment, FloatBuffer.wrap(input), longArrayOf(1, 3, targetHeight.toLong(), targetWidth.toLong()))</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$contours.map(Imgproc::boundingRect).filter { it.width &gt; bitmap.width * .04 &amp;&amp; it.height &gt; 8 &amp;&amp; it.height &lt; bitmap.height * .2 }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$for (y in 0 until mapHeight) for (x in 0 until mapWidth) flatBytes[y * mapWidth + x] = if (probability[y][x] &gt; DET_PROB_THRESHOLD) (-1).toByte() else 0</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$for (y in box.y until (box.y + box.height).coerceAtMost(mapHeight)) for (x in box.x until (box.x + box.width).coerceAtMost(mapWidth)) { sum += probability[y][x]; count++ }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$if (index != 0 &amp;&amp; index != previous &amp;&amp; index - 1 in dictionary.indices) { text.append(dictionary[index - 1]); confidence += scores[index]; count++ }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$private</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$return OcrBlock(UUID.randomUUID().toString(), pageId, decoded.first, decoded.second, BoundingBox(safe.x.toFloat() / source.width, safe.y.toFloat() / source.height, (safe.x + safe.width).toFloat() / source.width, (safe.y + safe.height).toFloat() / source.height))</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$return Rect((left * scaleX).toInt(), (top * scaleY).toInt(), ((right - left) * scaleX).toInt().coerceAtLeast(1), ((bottom - top) * scaleY).toInt().coerceAtLeast(1))</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$try { detectRegions(bitmap).mapNotNull { rect -&gt; recognizeLine(bitmap, rect, pageId) } } finally { bitmap.recycle() }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$val bgr = floatArrayOf((pixel and 0xff) / 255f, ((pixel shr 8) and 0xff) / 255f, ((pixel shr 16) and 0xff) / 255f)</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$val options = OrtSession.SessionOptions().apply { setIntraOpNumThreads(Runtime.getRuntime().availableProcessors().coerceAtMost(4)); setOptimizationLevel(OrtSession.SessionOptions.OptLevel.ALL_OPT) }</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$val rgba = Mat()</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$val safe = Rect(rect.x.coerceAtLeast(0), rect.y.coerceAtLeast(0), rect.width.coerceAtMost(source.width - rect.x), rect.height.coerceAtMost(source.height - rect.y))</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$val value = if (x &lt; targetWidth) { val pixel = pixels[y * targetWidth + x]; ((pixel shr (16 - channel * 8)) and 0xff) / 127.5f - 1f } else 0f</ID>
+    <ID>MaxLineLength:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$}</ID>
+    <ID>MaxLineLength:PagePreprocessor.kt$PagePreprocessor$Imgproc.adaptiveThreshold(gray, thresholded, 255.0, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 25, 15.0)</ID>
+    <ID>MaxLineLength:PagePreprocessor.kt$PagePreprocessor$val dstPoints = MatOfPoint2f(Point(0.0, 0.0), Point(outWidth, 0.0), Point(outWidth, outHeight), Point(0.0, outHeight))</ID>
+    <ID>MaxLineLength:PagePreprocessor.kt$PagePreprocessor$val outHeight = maxOf(distance(quad.topLeft, quad.bottomLeft, width, height), distance(quad.topRight, quad.bottomRight, width, height)).coerceAtLeast(1.0)</ID>
+    <ID>MaxLineLength:PagePreprocessor.kt$PagePreprocessor$val outWidth = maxOf(distance(quad.topLeft, quad.topRight, width, height), distance(quad.bottomLeft, quad.bottomRight, width, height)).coerceAtLeast(1.0)</ID>
+    <ID>MaxLineLength:RedactionDialog.kt$@Composable</ID>
+    <ID>MaxLineLength:RedactionDialog.kt$AlertDialog</ID>
+    <ID>MaxLineLength:RedactionDialog.kt$LazyColumn(Modifier.heightIn(max = 360.dp)) { items(candidates, key = { it.second.id }) { (page, block) -&gt; Row(Modifier.fillMaxWidth().clickable { if (block.id in selected) selected.remove(block.id) else selected.add(block.id) }.padding(vertical = 6.dp)) { Checkbox(block.id in selected, onCheckedChange = null); Text("Page ${page + 1}: ${block.text}", Modifier.padding(start = 8.dp)) } } }</ID>
+    <ID>MaxLineLength:RedactionDialog.kt$Text("Select recognized text to burn permanently into pixels. A new flattened copy will be created; the original remains unchanged.")</ID>
+    <ID>MaxLineLength:RedactionDialog.kt$}</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$Companion</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$Document(newId, entity.title, pdf.absolutePath, pdf.length(), safePages.size, "application/pdf", DocumentClassification.valueOf(entity.classification), tags = listOf("redacted-copy"), createdAt = java.time.Instant.ofEpochMilli(now), updatedAt = java.time.Instant.ofEpochMilli(now))</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$override suspend</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$safePages.forEachIndexed { index, pair -&gt; dao.insertOcrBlocks(pair.second.map { block -&gt; OcrBlockEntity(UUID.randomUUID().toString(), "$newId-$index", block.text, block.confidence, block.boundingBox.left, block.boundingBox.top, block.boundingBox.right, block.boundingBox.bottom, block.language) }) }</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val (pdf, safePages) = PdfEngine.createRedactedPdf(modelBlocks, regions, File(directory, "redacted.pdf"), File(directory, "pages"))</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val entity = DocumentEntity(newId, "${source.title} — redacted", pdf.absolutePath, pdf.length(), safePages.size, "application/pdf", source.classification, false, false, ProcessingState.READY.name, null, hash, now, now)</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val hash = MessageDigest.getInstance("SHA-256").digest(pdf.readBytes()).joinToString("") { "%02x".format(it) }</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val modelBlocks = pages.map { page -&gt; File(page.imagePath!!) to blocks[page.id].orEmpty().map { OcrBlock(it.id, it.pageId, it.text, it.confidence, BoundingBox(it.left, it.top, it.right, it.bottom), it.language) } }</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val newId = UUID.randomUUID().toString()</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val pageEntities = safePages.mapIndexed { index, pair -&gt; PageEntity("$newId-$index", newId, index, pair.first.absolutePath, pages[index].widthPx, pages[index].heightPx) }</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val safeText = safePages.flatMap { it.second }.joinToString("\n") { it.text }</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$OfflineRedactionRepository$val source = requireNotNull(dao.getById(documentId))</ID>
+    <ID>MaxLineLength:RedactionRepository.kt$RedactionRepository</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$.</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$&lt;no name provided&gt;$override fun onError(exception: ImageCaptureException)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$AndroidView(factory = { PreviewView(it).apply { this.controller = controller; scaleType = PreviewView.ScaleType.FILL_CENTER } }, modifier = Modifier.fillMaxSize())</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Button(enabled = pages.isNotEmpty(), onClick = { onFinished(pages.map(CapturedPage::path)) }) { Text("Done") }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Column</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$IconButton(onClick = onClose, Modifier.align(Alignment.TopStart).padding(20.dp).background(Color.Black.copy(.5f), CircleShape)) { Icon(Icons.Filled.Close, "Close scanner", tint = Color.White) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$IconButton(onClick = { onMoveLeft(selectedId) }) { Icon(Icons.Filled.KeyboardArrowLeft, "Move page earlier", tint = Color.White) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$IconButton(onClick = { onMoveRight(selectedId) }) { Icon(Icons.Filled.KeyboardArrowRight, "Move page later", tint = Color.White) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$IconButton(onClick = { onRemove(selectedId) }) { Icon(Icons.Filled.Delete, "Remove page", tint = Color(0xFFF87171)) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Modifier.align(Alignment.Center).fillMaxWidth().aspectRatio(bitmap.width.toFloat() / bitmap.height).onSizeChanged { boxSize = it }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Modifier.size(64.dp).clip(RoundedCornerShape(8.dp)).border(2.dp, if (selected) Color(0xFF34D399) else Color.White.copy(.3f), RoundedCornerShape(8.dp)).clickable(onClick = onClick)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$PageFilter.entries.forEach { option -&gt; FilterOption(option, selected = filter == option, onClick = { filter = option }) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$RadioButton(selected = selected, onClick = onClick, colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF34D399), unselectedColor = Color.White))</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Row</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$Text("Drag the corners to match the page edges", color = Color.White.copy(.8f), style = MaterialTheme.typography.bodySmall)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$bitmap?.let { Image(it.asImageBitmap(), "Page ${index + 1}", Modifier.fillMaxSize(), contentScale = ContentScale.Crop) } ?: CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp, color = Color.White)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$if (processing) CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp) else Text("Use photo")</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$itemsIndexed(pages, key = { _, page -&gt; page.id }) { index, page -&gt; PageThumbnail(page, index, selected = page.id == selectedId, onClick = { onSelect(page.id) }) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$onDrag(QuadPoint((point.x + dragAmount.x / boxSize.width).coerceIn(0f, 1f), (point.y + dragAmount.y / boxSize.height).coerceIn(0f, 1f)))</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$pages.indexOfFirst { it.id == id }.takeIf { it &gt;= 0 }?.let { index -&gt; File(pages[index].path).delete(); pages.removeAt(index) }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$private</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$val bitmap by produceState&lt;Bitmap?&gt;(null, page.path) { value = withContext(Dispatchers.IO) { decodeUprightBitmap(File(page.path), 200) } }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$val decoded = requireNotNull(BitmapFactory.decodeFile(file.absolutePath, BitmapFactory.Options().apply { inSampleSize = sampleSize })) { "Captured page could not be decoded" }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$val file = File(context.filesDir, "scan-sessions/${System.currentTimeMillis()}-raw.jpg").apply { parentFile?.mkdirs() }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$val preview by produceState&lt;Bitmap?&gt;(null, file) { value = withContext(Dispatchers.IO) { decodeUprightBitmap(file, 1200) } }</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$val rotated = Bitmap.createBitmap(decoded, 0, 0, decoded.width, decoded.height, Matrix().apply { postRotate(rotation.toFloat()) }, true)</ID>
+    <ID>MaxLineLength:ScannerScreen.kt$while (bounds.outWidth / (sampleSize * 2) &gt;= maxDimension &amp;&amp; bounds.outHeight / (sampleSize * 2) &gt;= maxDimension) sampleSize *= 2</ID>
+    <ID>MaxLineLength:SearchFeature.kt$!state.hasSearched -&gt; Text("Search runs only against the private on-device index.", color = MaterialTheme.colorScheme.onSurface.copy(.65f))</ID>
+    <ID>MaxLineLength:SearchFeature.kt$OutlinedTextField(value = state.query, onValueChange = { onAction(SearchAction.QueryChanged(it)) }, label = { Text("Search text, invoice number, or amount") }, singleLine = true, modifier = Modifier.fillMaxWidth())</ID>
+    <ID>MaxLineLength:SearchFeature.kt$SearchAction</ID>
+    <ID>MaxLineLength:SearchFeature.kt$SearchUiState</ID>
+    <ID>MaxLineLength:SearchFeature.kt$SearchViewModel$Factory : Factory</ID>
+    <ID>MaxLineLength:SearchFeature.kt$SearchViewModel$val</ID>
+    <ID>MaxLineLength:SearchFeature.kt$Text(result.document.classification.name.replace('_', ' '), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelMedium)</ID>
+    <ID>MaxLineLength:SearchFeature.kt$fun</ID>
+    <ID>MaxLineLength:SearchRepository.kt$FtsQuerySanitizer$term.replace(Regex("[^\\p{L}\\p{N}._-]"), "").takeIf(String::isNotBlank)?.let { "\"${it.replace("\"", "\"\"")}\"" }</ID>
+    <ID>MaxLineLength:SearchRepository.kt$OfflineSearchRepository$Document(row.id, row.title, row.filePath, row.fileSize, row.pageCount, row.mimeType, classification, row.isVaulted, row.isFavorite, createdAt = Instant.ofEpochMilli(row.createdAt), updatedAt = Instant.ofEpochMilli(row.updatedAt))</ID>
+    <ID>MaxLineLength:SearchRepository.kt$OfflineSearchRepository$if</ID>
+    <ID>MaxLineLength:SearchRepository.kt$OfflineSearchRepository.Companion$fun create(context: android.content.Context): OfflineSearchRepository</ID>
+    <ID>MaxLineLength:SearchRepository.kt$SearchRepository</ID>
+    <ID>MaxLineLength:SearchViewModelTest.kt$FakeSearchRepository$val document = Document("doc-1", "Result for $query", "/data/doc-1.pdf", 10, 1, createdAt = Instant.now(), updatedAt = Instant.now())</ID>
+    <ID>MaxLineLength:VaultFeature.kt$@Composable</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultAuthenticator$const val AUTHENTICATORS = BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultAuthenticator$prompt.authenticate(BiometricPrompt.PromptInfo.Builder().setTitle(title).setSubtitle("Use a strong biometric or device screen lock").setAllowedAuthenticators(AUTHENTICATORS).build())</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultAuthenticator.&lt;no name provided&gt;$override fun onAuthenticationError(code: Int, message: CharSequence)</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultViewModel$Factory : Factory</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultViewModel$fun open(id: String, onReady: (File) -&gt; Unit, onError: (String) -&gt; Unit)</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultViewModel$fun restore(id: String, onDone: () -&gt; Unit, onError: (String) -&gt; Unit)</ID>
+    <ID>MaxLineLength:VaultFeature.kt$VaultViewModel$val documents = repository.observeVault().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())</ID>
+    <ID>MaxLineLength:VaultFeature.kt$else</ID>
+    <ID>MaxLineLength:VaultFeature.kt$if</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$.</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$Companion</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$generator</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$private fun decrypt(input: File, output: File, key: SecretKey)</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$private fun deleteKey(id: String)</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$private fun encrypt(input: File, output: File, key: SecretKey)</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$private fun existingKey(id: String): SecretKey</ID>
+    <ID>MaxLineLength:VaultRepository.kt$KeystoreVaultRepository$val source = File(document.filePath)</ID>
+    <ID>MaxLineLength:VaultRepository.kt$private fun DocumentEntity.toModel()</ID>
+    <ID>MaxLineLength:VaultViewModelTest.kt$VaultViewModelTest$val document = Document("doc-1", "Statement", "/data/vault/doc-1.lpv", 100, 1, createdAt = java.time.Instant.now(), updatedAt = java.time.Instant.now(), isVaulted = true)</ID>
+    <ID>MaxLineLength:VaultViewModelTest.kt$VaultViewModelTest$val repository = FakeVaultRepository(openResult = Result.failure(IllegalStateException("Vault key was invalidated and this file cannot be recovered")))</ID>
+    <ID>MaxLineLength:ViewerViewModelTest.kt$ViewerViewModelTest$private val document = Document("doc-1", "Invoice", "/data/doc-1.pdf", 100, 1, createdAt = Instant.now(), updatedAt = Instant.now())</ID>
+    <ID>NestedBlockDepth:DocumentEdgeDetector.kt$DocumentEdgeDetector$fun analyze(image: ImageProxy): ScanAnalysis</ID>
+    <ID>NestedBlockDepth:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$private fun recognizeLine(source: Bitmap, rect: Rect, pageId: String): OcrBlock?</ID>
+    <ID>ReturnCount:DocumentProcessingWorker.kt$DocumentProcessingWorker$override suspend fun doWork(): Result</ID>
+    <ID>ReturnCount:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$private fun recognizeLine(source: Bitmap, rect: Rect, pageId: String): OcrBlock?</ID>
+    <ID>SpreadOperator:DocumentEdgeDetector.kt$DocumentEdgeDetector$(*contour.toArray())</ID>
+    <ID>SwallowedException:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:DocumentProcessingWorker.kt$DocumentProcessingWorker$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:EditorRepository.kt$OfflineEditorRepository$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:OfflineDocumentRepository.kt$OfflineDocumentRepository$error: Throwable</ID>
+    <ID>TooGenericExceptionCaught:OnDeviceOcrEngine.kt$OnDeviceOcrEngine$error: Exception</ID>
+    <ID>TooGenericExceptionCaught:RedactionRepository.kt$OfflineRedactionRepository$error: Throwable</ID>
+    <ID>TooManyFunctions:LocalPdfDatabase.kt$DocumentDao</ID>
+    <ID>TooManyFunctions:MainActivity.kt$com.localpdf.MainActivity.kt</ID>
+    <ID>TooManyFunctions:OfflineDocumentRepository.kt$OfflineDocumentRepository : DocumentRepository</ID>
+    <ID>TooManyFunctions:OnDeviceOcrEngine.kt$OnDeviceOcrEngine : Closeable</ID>
+    <ID>TooManyFunctions:VaultRepository.kt$KeystoreVaultRepository : VaultRepository</ID>
+    <ID>UnusedParameter:MainActivity.kt$onScan: () -&gt; Unit</ID>
+    <ID>UnusedPrivateMember:MainActivity.kt$@Composable private fun EmptyFeatureCard(icon: ImageVector, title: String, detail: String)</ID>
+    <ID>UnusedPrivateMember:MainActivity.kt$@Composable private fun LibraryEmptyState(expanded: Boolean, onScan: () -&gt; Unit)</ID>
+    <ID>WildcardImport:DocumentViewer.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:DocumentViewer.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:DocumentViewer.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:DocumentViewer.kt$import kotlinx.coroutines.flow.*</ID>
+    <ID>WildcardImport:OcrCorrectionDialog.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:RedactionDialog.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:RedactionDialog.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:RedactionDialog.kt$import androidx.compose.runtime.*</ID>
+    <ID>WildcardImport:RedactionDialog.kt$import com.localpdf.core.model.*</ID>
+    <ID>WildcardImport:RedactionRepository.kt$import com.localpdf.core.database.*</ID>
+    <ID>WildcardImport:RedactionRepository.kt$import com.localpdf.core.model.*</ID>
+    <ID>WildcardImport:VaultFeature.kt$import androidx.compose.foundation.layout.*</ID>
+    <ID>WildcardImport:VaultFeature.kt$import androidx.compose.material3.*</ID>
+    <ID>WildcardImport:VaultRepository.kt$import java.io.*</ID>
+  </CurrentIssues>
+</SmellBaseline>
