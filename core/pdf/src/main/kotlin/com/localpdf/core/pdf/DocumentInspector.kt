@@ -1,6 +1,5 @@
 package com.localpdf.core.pdf
 
-import android.graphics.ImageDecoder
 import android.graphics.pdf.PdfRenderer
 import android.os.ParcelFileDescriptor
 import java.io.File
@@ -39,16 +38,11 @@ object DocumentInspector {
     }
 
     private fun inspectImage(file: File): InspectedDocument {
-        val source = ImageDecoder.createSource(file)
-        var width = 0
-        var height = 0
-        ImageDecoder.decodeDrawable(source) { decoder, info, _ ->
-            width = info.size.width
-            height = info.size.height
-            decoder.setTargetSize(1, 1)
-        }
-        require(width > 0 && height > 0) { "Image is malformed" }
-        return InspectedDocument(1, width, height)
+        // Bounds-only decode avoids loading pixels; ImageDecoder would be simpler but requires API 28 (minSdk is 26).
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, options)
+        require(options.outWidth > 0 && options.outHeight > 0) { "Image is malformed" }
+        return InspectedDocument(1, options.outWidth, options.outHeight)
     }
 }
 

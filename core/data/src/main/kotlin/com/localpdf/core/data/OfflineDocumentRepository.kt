@@ -160,7 +160,17 @@ class OfflineDocumentRepository(
     }
 
     private fun sniffMime(uri: Uri): String {
-        val bytes: ByteArray = context.contentResolver.openInputStream(uri).use { it?.readNBytes(12) } ?: byteArrayOf()
+        // InputStream.readNBytes(int) requires API 33; minSdk is 26, so read bounded bytes manually instead.
+        val bytes: ByteArray = context.contentResolver.openInputStream(uri).use { stream ->
+            val buffer = ByteArray(12)
+            var total = 0
+            while (stream != null && total < buffer.size) {
+                val count = stream.read(buffer, total, buffer.size - total)
+                if (count < 0) break
+                total += count
+            }
+            buffer.copyOf(total)
+        }
         return when {
             bytes.take(4).toByteArray().contentEquals("%PDF".toByteArray()) -> "application/pdf"
             bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() -> "image/jpeg"
